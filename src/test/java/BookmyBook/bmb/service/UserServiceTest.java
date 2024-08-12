@@ -1,16 +1,15 @@
 package BookmyBook.bmb.service;
 
-import BookmyBook.bmb.domain.Member;
-import BookmyBook.bmb.repository.MemberRepository;
+import BookmyBook.bmb.domain.User;
+import BookmyBook.bmb.repository.UserRepository;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.Transactional;
-import static org.assertj.core.api.Assertions.*;
+
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Assertions;
@@ -19,39 +18,40 @@ import org.junit.jupiter.api.Assertions;
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
 @Transactional
-class MemberServiceTest {
+class UserServiceTest {
 
-    @Autowired MemberService memberService;
-    @Autowired MemberRepository memberRepository;
+    @Autowired
+    UserService userService;
+    @Autowired UserRepository userRepository;
     @Autowired EntityManager em;
 
     @Test
     public void 회원가입() throws Exception {
         //given
-        Member member = new Member();
-        member.setName("Kim");
+        User user = new User();
+        user.setNickname("Kim");
 
         //when
-        Long saveId = memberService.join(member);
+        Long saveId = userService.join(user);
 
         //then
-        Assertions.assertEquals(member, memberRepository.findOne(saveId));
+        Assertions.assertEquals(user, userRepository.findOne(saveId));
     }
 
     @Test
     public void 중복_회원_예외() throws Exception {
         //given
-        Member member1 = new Member();
-        member1.setName("Kim");
+        User user1 = new User();
+        user1.setNickname("Kim");
 
-        Member member2 = new Member();
-        member2.setName("Kim");
+        User user2 = new User();
+        user2.setNickname("Kim");
 
         //when
-        memberService.join(member1);
+        userService.join(user1);
 
         //then
         assertThrows(IllegalStateException.class, () ->
-        { memberService.join(member2); });
+        { userService.join(user2); });
     }
 }
