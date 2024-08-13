@@ -1,12 +1,12 @@
 package BookmyBook.bmb.Controller;
 
-import BookmyBook.bmb.domain.Member;
 import BookmyBook.bmb.domain.Order;
+import BookmyBook.bmb.domain.User;
 import BookmyBook.bmb.domain.item.Item;
 import BookmyBook.bmb.repository.OrderSearch;
 import BookmyBook.bmb.service.ItemService;
-import BookmyBook.bmb.service.MemberService;
 import BookmyBook.bmb.service.OrderService;
+import BookmyBook.bmb.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -19,13 +19,13 @@ import java.util.List;
 public class OrderController {
 
     private final OrderService orderService;
-    private final MemberService memberService;
+    private final UserService userService;
     private final ItemService itemService;
 
     @GetMapping("/order")
     public String createForm(Model model){
 
-        List<Member> members = memberService.findMembers();
+        List<User> members = userService.findUsers();
         List<Item> items = itemService.findItems();
 
         model.addAttribute("members", members);

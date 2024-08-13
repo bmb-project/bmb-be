@@ -1,15 +1,14 @@
 package BookmyBook.bmb.service;
 
 import BookmyBook.bmb.domain.Address;
-import BookmyBook.bmb.domain.Member;
 import BookmyBook.bmb.domain.Order;
 import BookmyBook.bmb.domain.OrderStatus;
+import BookmyBook.bmb.domain.User;
 import BookmyBook.bmb.domain.item.Book;
 import BookmyBook.bmb.domain.item.Item;
 import BookmyBook.bmb.exception.NotEnouchStockException;
 import BookmyBook.bmb.repository.OrderRepository;
 import jakarta.persistence.EntityManager;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,14 +32,14 @@ class OrderServiceTest {
     @Test
     public void 상품주문() throws Exception {
         //given
-        Member member = createMember();
+        User user = createUser();
 
         Book book = createBook("시골 JPA", 10000, 10);
 
         int orderCount = 2;
 
         //when
-        Long orderId = orderService.order(member.getId(), book.getId(), orderCount);
+        Long orderId = orderService.order(user.getId(), book.getId(), orderCount);
 
         //then
         Order getOrder = orderRepository.findOne(orderId);
@@ -54,7 +53,7 @@ class OrderServiceTest {
     @Test()
     public void 상품주문_재고수량초과() throws Exception {
         //given
-        Member member = createMember();
+        User user = createUser();
         Item item = createBook("시골 JPA", 10000, 10);
 
         int orderCount = 11;
@@ -63,18 +62,18 @@ class OrderServiceTest {
 
         //then
         assertThrows(NotEnouchStockException.class,
-                () -> orderService.order(member.getId(), item.getId(), orderCount), "재고 수량 부족 예외가 발생해야 한다.");
+                () -> orderService.order(user.getId(), item.getId(), orderCount), "재고 수량 부족 예외가 발생해야 한다.");
     }
     
     @Test
     public void 주문취소() throws Exception {
         //given
-        Member member = createMember();
+        User user = createUser();
         Book item = createBook("시골 JPA", 10000, 10);
 
         int orderCount = 2;
 
-        Long orderId = orderService.order(member.getId(), item.getId(), orderCount);
+        Long orderId = orderService.order(user.getId(), item.getId(), orderCount);
 
         //when
         orderService.cancelOrder(orderId);
@@ -95,11 +94,11 @@ class OrderServiceTest {
         return book;
     }
 
-    private Member createMember() {
-        Member member = new Member();
-        member.setName("회원1");
-        member.setAddress(new Address("서울", "강가", "123-123"));
-        em.persist(member);
-        return member;
+    private User createUser() {
+        User user = new User();
+        user.setNickname("회원1");
+        user.setAddress(new Address("서울", "강가", "123-123"));
+        em.persist(user);
+        return user;
     }
 }

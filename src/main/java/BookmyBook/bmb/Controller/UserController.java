@@ -1,8 +1,8 @@
 package BookmyBook.bmb.Controller;
 
 import BookmyBook.bmb.domain.Address;
-import BookmyBook.bmb.domain.Member;
-import BookmyBook.bmb.service.MemberService;
+import BookmyBook.bmb.domain.User;
+import BookmyBook.bmb.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -15,18 +15,18 @@ import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
-public class MemberController {
+public class UserController {
 
-    private final MemberService memberService;
+    private final UserService userService;
 
     @GetMapping("/members/new")
     public String createForm(Model model){
-        model.addAttribute("memberForm", new MemberForm());
+        model.addAttribute("memberForm", new UserForm());
         return "members/createMemberForm";
     }
 
     @PostMapping("/members/new")
-    public String create(@Valid MemberForm form, BindingResult result){
+    public String create(@Valid UserForm form, BindingResult result){
 
         if(result.hasErrors()){
             return "members/createMemberForm";
@@ -34,18 +34,18 @@ public class MemberController {
 
         Address address = new Address(form.getCity(), form.getStreet(), form.getZipcode());
 
-        Member member = new Member();
-        member.setName(form.getName());
-        member.setAddress(address);
+        User user = new User();
+        user.setNickname(form.getName());
+       // user.setAddress(address);
 
-        memberService.join(member);
+        userService.join(user);
         return "redirect:/";
     }
 
     @GetMapping("/members")
     public String list(Model model){
-        List<Member> members = memberService.findMembers();
-        model.addAttribute("members", members);
+        List<User> users = userService.findUsers();
+        model.addAttribute("members", users);
         return "/members/memberList";
     }
 }
