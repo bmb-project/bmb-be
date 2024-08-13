@@ -42,7 +42,7 @@ public class Order {
     //==연관관계 메서드==//
     public void setUser(User user){
         this.user = user;
-        user.getOrders().add(this);
+        //user.getOrders().add(this);
     }
 
     public void addOrderItem(OrderItem orderItem){

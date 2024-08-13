@@ -36,7 +36,7 @@ public class UserController {
 
         User user = new User();
         user.setNickname(form.getName());
-        user.setAddress(address);
+       // user.setAddress(address);
 
         userService.join(user);
         return "redirect:/";
