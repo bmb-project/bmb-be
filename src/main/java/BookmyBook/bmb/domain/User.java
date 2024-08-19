@@ -25,7 +25,7 @@ public class User{
     @NotNull
     private String nickname; //사용자 이름
 
-    @Column(length = 15)
+    @Column(length = 60)
     @NotNull
     private String password; //비밀번호
 
