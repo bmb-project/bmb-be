@@ -6,7 +6,7 @@ spring:
     driver-class-name: org.h2.Driver
   jpa:
     hibernate:
-      ddl-auto: create
+      #ddl-auto: create
     properties:
       hibernate:
         # show_sql: true
@@ -15,3 +15,8 @@ logging:
   level:
     org.hibernate.SQL: debug
     org.hibernate.type: trace
+
+# application.yml
+jwt:
+  secret: 1234
+  expiration: 86400000  # 1일 (밀리초 단위)

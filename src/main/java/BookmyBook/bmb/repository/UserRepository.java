@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
@@ -40,4 +41,11 @@ public class UserRepository {
                 .getResultList();
     }
 
+    //로그인 회원 조회
+    public List<User> findByUserIdAndPw(String userId, String password){
+        return em.createQuery("select u from User u where u.user_id = :userId and u.password = :password", User.class)
+                .setParameter("userId", userId)
+                .setParameter("password", password)
+                .getResultList();
+    }
 }

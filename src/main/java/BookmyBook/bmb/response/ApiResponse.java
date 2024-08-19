@@ -1,5 +1,6 @@
-package BookmyBook.bmb.api;
+package BookmyBook.bmb.response;
 
+import BookmyBook.bmb.domain.UserRole;
 import lombok.Getter;
 import lombok.Setter;
 
