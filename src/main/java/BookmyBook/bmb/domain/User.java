@@ -2,8 +2,6 @@ package BookmyBook.bmb.domain;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -41,8 +39,6 @@ public class User{
         this.created_at = LocalDateTime.now();
     }
 
-    /*@Embedded
-    private Address address;   */
 
    /* @OneToMany(mappedBy = "user")
     private List<Order> orders = new ArrayList<>();*/

@@ -18,7 +18,7 @@ public class GlobalExceptionHandler {
                 .code(ex.getCode())
                 .message(ex.getMessage())
                 .build();
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+        return ResponseEntity.status(HttpStatus.valueOf(ex.getStatus())).body(errorResponse);
     }
 
     //INTERNAL_SERVER_ERROR
@@ -30,9 +30,6 @@ public class GlobalExceptionHandler {
                 .message("서버 오류")
                 .build();
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
-
-        /*return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(new ApiResponse(500, "서버 오류", null);*/
     }
 }
 

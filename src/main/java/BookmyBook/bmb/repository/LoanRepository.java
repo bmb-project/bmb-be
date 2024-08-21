@@ -1,37 +1,28 @@
 package BookmyBook.bmb.repository;
 
-import BookmyBook.bmb.domain.User;
-import BookmyBook.bmb.domain.Order;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.TypedQuery;
-import jakarta.persistence.criteria.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
-import org.springframework.util.StringUtils;
-
-import java.util.ArrayList;
-import java.util.List;
 
 
 @Repository
 @RequiredArgsConstructor
-public class OrderRepository {
+public class LoanRepository {
 
-    private final EntityManager em;
+   /* private final EntityManager em;
 
-    public void save(Order order){
-        em.persist(order);
+    public void save(Wish wish){
+        em.persist(wish);
     }
 
-    public Order findOne(Long id){
-        return em.find(Order.class, id);
+    public Wish findOne(Long id){
+        return em.find(Wish.class, id);
     }
 
-    /**
+    *//**
      * JPQL 처리
      * JPQL 쿼리를 문자로 생성하기는 번거롭고, 실수로 인한 버그가 충분히 발생할 수 있다.
-     */
-    public List<Order> findAllByString(OrderSearch orderSearch) {
+     *//*
+    public List<Wish> findAllByString(OrderSearch orderSearch) {
         //language=JPAQL
         String jpql = "select o From Order o join o.users u";
         boolean isFirstCondition = true;
@@ -55,7 +46,7 @@ public class OrderRepository {
             }
             jpql += " u.name like :name";
         }
-        TypedQuery<Order> query = em.createQuery(jpql, Order.class)
+        TypedQuery<Wish> query = em.createQuery(jpql, Wish.class)
                 .setMaxResults(1000); //최대 1000건
         if (orderSearch.getOrderStatus() != null) {
             query = query.setParameter("status", orderSearch.getOrderStatus());
@@ -65,16 +56,16 @@ public class OrderRepository {
         return query.getResultList();
     }
 
-    /**
+    *//**
      * JPA Criteria
      * JPA Criteria는 JPA 표준 스펙이지만 실무에서 사용하기에 너무 복잡하다.
      * 대안 : Querydsl
-     */
-    public List<Order> findAllByCriteria(OrderSearch orderSearch) {
+     *//*
+    public List<Wish> findAllByCriteria(OrderSearch orderSearch) {
         CriteriaBuilder cb = em.getCriteriaBuilder();
-        CriteriaQuery<Order> cq = cb.createQuery(Order.class);
-        Root<Order> o = cq.from(Order.class);
-        Join<Order, User> m = o.join("users", JoinType.INNER); //회원과 조인
+        CriteriaQuery<Wish> cq = cb.createQuery(Wish.class);
+        Root<Wish> o = cq.from(Wish.class);
+        Join<Wish, User> m = o.join("users", JoinType.INNER); //회원과 조인
         List<Predicate> criteria = new ArrayList<>();
         //주문 상태 검색
         if (orderSearch.getOrderStatus() != null) {
@@ -90,7 +81,7 @@ public class OrderRepository {
             criteria.add(name);
         }
         cq.where(cb.and(criteria.toArray(new Predicate[criteria.size()])));
-        TypedQuery<Order> query = em.createQuery(cq).setMaxResults(1000); //최대 1000건
+        TypedQuery<Wish> query = em.createQuery(cq).setMaxResults(1000); //최대 1000건
         return query.getResultList();
-    }
+    }*/
 }

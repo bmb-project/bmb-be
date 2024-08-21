@@ -1,13 +1,14 @@
 package BookmyBook.bmb.service;
 
+
 import BookmyBook.bmb.domain.User;
 import BookmyBook.bmb.repository.UserRepository;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import BookmyBook.bmb.response.ApiResponse;
 import BookmyBook.bmb.response.ExceptionResponse;
+import BookmyBook.bmb.security.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -21,6 +22,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserService {
 
+    @Autowired
+    private JwtUtil jwtUtil;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
@@ -109,7 +112,13 @@ public class UserService {
     /**
      * 회원 정보 조회
      */
-    public User findOne(String userId){
+    public User findOne(String token){
+        String userId = jwtUtil.getUserId(token);
+
+        if(userId == null){
+            throw new ExceptionResponse(401, "존재하지 않는 TOKEN", "INVALID_TOKEN");
+        }
+
         List<User> findUsersById = userRepository.findByUserID(userId);
 
         if(findUsersById.isEmpty()){
