@@ -1,5 +1,6 @@
 package BookmyBook.bmb.security;
 
+import BookmyBook.bmb.exception.CustomAccessDeniedHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,7 +16,13 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     @Autowired
-    private JwtUtil jwtUtil;
+    private final JwtUtil jwtUtil;
+    private CustomAccessDeniedHandler accessDeniedHandler;
+
+    public SecurityConfig(JwtUtil jwtUtil, CustomAccessDeniedHandler accessDeniedHandler) {
+        this.jwtUtil = jwtUtil;
+        this.accessDeniedHandler = accessDeniedHandler;
+    }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -25,10 +32,16 @@ public class SecurityConfig {
                         authorizeRequests
                                 .requestMatchers("/user/signin").permitAll() // 로그인 API는 인증 없이 접근 가능
                                 .requestMatchers("/user/signup").permitAll() // 회원가입 API
-                                .requestMatchers("/user/**").authenticated()
+                                .requestMatchers("/user").authenticated()
                                 .anyRequest().authenticated() // 그 외의 요청은 인증 필요
                 )
-                .addFilterBefore(new JwtFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(new JwtFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class)
+                .exceptionHandling(exceptionHandling ->
+                        exceptionHandling
+                                .accessDeniedHandler(accessDeniedHandler)
+
+                );
+
 
         return http.build();
     }
