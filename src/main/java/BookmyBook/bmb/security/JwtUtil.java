@@ -78,8 +78,8 @@ public class JwtUtil {
         return claims.get("nickname", String.class);
     }
 
-    public boolean validateToken(String token, String nickname) {
-        return (nickname.equals(getNickname(token)) && !isTokenExpired(token));
+    public boolean validateToken(String token, String user_id) {
+        return (user_id.equals(getUserId(token)) && !isTokenExpired(token));
     }
 
     public boolean isTokenExpired(String token) {
