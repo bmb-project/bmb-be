@@ -1,5 +1,6 @@
 package BookmyBook.bmb.security;
 
+import BookmyBook.bmb.domain.UserRole;
 import BookmyBook.bmb.response.ExceptionResponse;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
@@ -16,14 +17,14 @@ public class JwtUtil {
     @Value("${jwt.secret}")
     private String secretKey;
 
-    private final long validityInMilliseconds = 3600000; // 1 hour
-
     //JWT token 생성 메소드
-    public String createToken(String user_id, String nickname) {
+    public String createToken(String user_id, UserRole role) {
         Claims claims = Jwts.claims().setSubject(user_id); //user_id를 subject로 선정
-        claims.put("nickname", nickname); //nickname을 claim에 추가
+        claims.put("role", role.name()); //role을 claims에 포함
 
         Date now = new Date();
+        // 1 hour
+        long validityInMilliseconds = 3600000;
         Date validity = new Date(now.getTime() + validityInMilliseconds);
 
         return Jwts.builder()
@@ -62,12 +63,12 @@ public class JwtUtil {
         return claims.getSubject(); //subject에서 user_id 추출
     }
 
-    //nickname 추출
-    public String getNickname(String token) {
+    //role 추출
+    public String  getRole(String token){
         Claims claims;
-        try {
+        try{
             claims = extractClaims(token);
-        }catch (Exception e){
+        } catch (Exception e){
             throw new ExceptionResponse(400, "token 추출 실패", "TOKEN_EXTRACTION_FAILED");
         }
 
@@ -75,7 +76,7 @@ public class JwtUtil {
             throw new ExceptionResponse(401, "유효하지 않은 token", "INVALID_TOKEN");
         }
 
-        return claims.get("nickname", String.class);
+        return (String) claims.get("role");
     }
 
     public boolean validateToken(String token, String user_id) {
@@ -84,6 +85,6 @@ public class JwtUtil {
 
     public boolean isTokenExpired(String token) {
         Claims claims = extractClaims(token);
-        return (claims != null) ? claims.getExpiration().before(new Date()) : true;
+        return claims == null || claims.getExpiration().before(new Date());
     }
 }

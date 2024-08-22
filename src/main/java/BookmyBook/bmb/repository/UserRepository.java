@@ -6,7 +6,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
@@ -16,15 +15,6 @@ public class UserRepository {
 
     public void save(User user){
         em.persist(user);
-    }
-
-    public User findOne(Long id){
-        return em.find(User.class, id);
-    }
-
-    public List<User> findAll(){
-        return em.createQuery("select u from User u", User.class)
-                .getResultList();
     }
 
     //ID 조회
@@ -38,14 +28,6 @@ public class UserRepository {
     public List<User> findByNickname(String nickname){
         return em.createQuery("select u from User u where u.nickname = :nickname", User.class)
                 .setParameter("nickname", nickname)
-                .getResultList();
-    }
-
-    //로그인 회원 조회
-    public List<User> findByUserIdAndPw(String userId, String password){
-        return em.createQuery("select u from User u where u.user_id = :userId and u.password = :password", User.class)
-                .setParameter("userId", userId)
-                .setParameter("password", password)
                 .getResultList();
     }
 }

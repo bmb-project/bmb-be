@@ -1,16 +1,19 @@
 package BookmyBook.bmb.security;
 
+import BookmyBook.bmb.domain.UserRole;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Collection;
 import java.util.Collections;
 
 public class JwtFilter extends OncePerRequestFilter {
@@ -33,8 +36,15 @@ public class JwtFilter extends OncePerRequestFilter {
             token = token.substring(7); // "Bearer "를 제거한 실제 토큰
             try {
                 String user_id = jwtUtil.getUserId(token);
+                String roleString = jwtUtil.getRole(token);
+                UserRole role = UserRole.valueOf(roleString);
 
                 if (user_id != null && jwtUtil.validateToken(token, user_id)) {
+                    //역할에 따른 권한 설정
+                    Collection<? extends GrantedAuthority> authorities = Collections.singletonList(
+                            new SimpleGrantedAuthority(role.name())
+                    );
+
                     //사용자 아이디으로 인증 객체 생성
                     Authentication authentication = new UsernamePasswordAuthenticationToken(
                             user_id, null, Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"))

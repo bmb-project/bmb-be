@@ -40,8 +40,9 @@ public class UserApiController {
         user.setRole(UserRole.USER);
 
         User join = userService.join(user);
+        UserDto userDto = new UserDto(join.getUser_id(), join.getNickname(), join.getRole());
 
-        return ResponseEntity.ok(new ApiResponse(200, "회원가입 성공", join));
+        return ResponseEntity.ok(new ApiResponse(200, "회원가입 성공", userDto));
 
     }
 
@@ -54,10 +55,11 @@ public class UserApiController {
         user.setPassword(request.getPassword());
 
         User login = userService.login(user);
+        UserDto userDto = new UserDto(login.getUser_id(), login.getNickname(), login.getRole());
 
-        String token = jwtUtil.createToken(login.getUser_id(), login.getNickname());
+        String token = jwtUtil.createToken(login.getUser_id(), login.getRole());
 
-        return ResponseEntity.ok(new TokenResponse(200, "로그인 성공", token, login));
+        return ResponseEntity.ok(new TokenResponse(200, "로그인 성공", token, userDto));
     }
 
     //회원 정보 조회
@@ -74,7 +76,7 @@ public class UserApiController {
         //JWT token에서 사용자 정보 조회
         User user = userService.findOne(token);
 
-        UserDto userDto = new UserDto(user.getId(), user.getUser_id(), user.getNickname(), user.getRole());
+        UserDto userDto = new UserDto(user.getUser_id(), user.getNickname(), user.getRole());
 
         return ResponseEntity.ok(new ApiResponse(200, "회원 조회 성공", userDto));
     }
@@ -85,19 +87,4 @@ public class UserApiController {
         private String user_id;
         private String password;
     }
-
-    /*@Data
-    static class CreateUserResponse {
-        private Long id;
-        private String user_id;
-        private String nickname;
-        private LocalDateTime create_at;
-
-        public CreateUserResponse(User user) {
-            this.id = user.getId();
-            this.user_id = user.getUser_id();
-            this.nickname = user.getNickname();
-            this.create_at = user.getCreated_at();
-        }
-    }*/
 }
