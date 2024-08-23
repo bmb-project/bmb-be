@@ -1,10 +1,10 @@
     package BookmyBook.bmb.domain;
 
     import jakarta.persistence.*;
-    import jakarta.validation.constraints.NotNull;
     import lombok.Getter;
     import lombok.Setter;
 
+    import java.time.LocalDate;
     import java.time.LocalDateTime;
 
     @Entity
@@ -35,7 +35,7 @@
         private String publisher_name; //출판사 이름
 
         @Column(nullable = false)
-        private LocalDateTime published_date; //출판 날짜
+        private LocalDate published_date; //출판 날짜
 
         @Column(updatable = false, nullable = false)
         private LocalDateTime created_at; //등록 일시
@@ -47,28 +47,4 @@
         protected void onCreate(){
             this.created_at = LocalDateTime.now();
         }
-
-
-     /*   @ManyToMany(mappedBy = "items")
-        private List<Category> categories = new ArrayList<>();*/
-
-        //==비지니스 로직==//
-
-    /*    *//**
-         * stock 증가
-         *//*
-        public void addStock(int quantity){
-            this.stockQuantity += quantity;
-        }
-
-        *//**
-         * stock 감소
-         *//*
-        public void removeStock(int quantity){
-            int restStock = this.stockQuantity - quantity;
-            if(restStock < 0){
-                throw new NotEnouchStockException("need more stock");
-            }
-            this.stockQuantity = restStock;
-        }*/
     }

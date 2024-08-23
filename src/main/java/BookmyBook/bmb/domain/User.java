@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "Users")
@@ -15,7 +17,7 @@ public class User{
     @Id  @GeneratedValue //@Id: primary key @GeneratedValue : 값 자동 생성
     private Long id; //사용자 고유 ID
 
-    @Column(unique = true, length = 10)
+    @Column(name = "user_id", unique = true, length = 10)
     @NotNull
     private String user_id; //사용자 ID
 
@@ -38,6 +40,9 @@ public class User{
     protected void onCreate(){
         this.created_at = LocalDateTime.now();
     }
+
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<Wish> wishes = new ArrayList<>(); // User가 가진 Wish 목록
 
 
    /* @OneToMany(mappedBy = "user")

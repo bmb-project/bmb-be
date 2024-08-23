@@ -87,9 +87,8 @@ public class UserService {
      **/
     @Transactional
     public User login (User user){
-        User login = checkExistUser(user);
 
-        return login;
+        return checkExistUser(user);
     }
 
     //회원 등록 여부 확인
@@ -100,7 +99,7 @@ public class UserService {
             throw new ExceptionResponse(401,"로그인 실패", "INVALID_CREDENTIALS");
         }
 
-        User findUser = findUsersById.get(0);
+        User findUser = findUsersById.getFirst();
         //저장된 암호화 비밀번호와 입력된 비밀번호 비교
         if(!passwordEncoder.matches(user.getPassword(), findUser.getPassword())){
             throw new ExceptionResponse(401,"로그인 실패", "INVALID_CREDENTIALS");
@@ -125,14 +124,6 @@ public class UserService {
             throw new ExceptionResponse(404, "회원 조회 실패", "FAIL_TO_LOAD");
         }
 
-        User findOne = findUsersById.get(0);
-        return findOne;
+        return findUsersById.getFirst();
     }
-
-    //회원 전체 조회
-    public List<User> findUsers(){
-        return userRepository.findAll();
-    }
-
-
 }

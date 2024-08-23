@@ -1,32 +1,11 @@
 package BookmyBook.bmb.repository;
 
 import BookmyBook.bmb.domain.Book;
-import jakarta.persistence.EntityManager;
-import lombok.RequiredArgsConstructor;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
-
 @Repository
-@RequiredArgsConstructor
-public class BookRepository {
-
-    private final EntityManager em;
-
-    public void save(Book book){
-        if(book.getId() == null){
-            em.persist(book);
-        }else {
-            em.merge(book);
-        }
-    }
-
-    public Book findOne(Long id){
-        return em.find(Book.class, id);
-    }
-
-    public List<Book> findAll(){
-        return em.createQuery("select i from Item i", Book.class)
-                .getResultList();
-    }
+public interface BookRepository extends JpaRepository<Book, Long>, JpaSpecificationExecutor<Book> {
+    // Specification과 Pageable을 사용하는 메소드가 자동으로 제공됩니다.
 }
