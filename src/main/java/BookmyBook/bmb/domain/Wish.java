@@ -26,9 +26,12 @@ public class Wish {
     @JoinColumn(name = "user_id", referencedColumnName = "user_id", insertable = false, updatable = false)
     private User user;
 
+    @Column(name = "book_isbn", length = 13)
+    private String isbn; //외래 키로 사용할 도서 isbn
+
     @ManyToOne(fetch = LAZY)
-    @JoinColumn(name = "book_id")
-    private Book book; //도서 ID
+    @JoinColumn(name = "book_isbn", referencedColumnName = "isbn", insertable = false, updatable = false)
+    private Book book; //도서 isbn
 
     @Column(nullable = false)
     private LocalDateTime added_at; //추가 일시

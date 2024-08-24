@@ -14,7 +14,7 @@ import java.util.List;
 @Getter @Setter
 public class User{
 
-    @Id  @GeneratedValue //@Id: primary key @GeneratedValue : 값 자동 생성
+    @Id  @GeneratedValue(strategy = GenerationType.IDENTITY) //@Id: primary key @GeneratedValue : 값 자동 생성
     private Long id; //사용자 고유 ID
 
     @Column(name = "user_id", unique = true, length = 10)

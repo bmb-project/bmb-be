@@ -1,66 +1,109 @@
 package BookmyBook.bmb.service;
 
+import BookmyBook.bmb.domain.Book;
+import BookmyBook.bmb.domain.BookStatus;
+import BookmyBook.bmb.domain.Loan;
 import BookmyBook.bmb.repository.BookRepository;
-import BookmyBook.bmb.repository.UserRepository;
 import BookmyBook.bmb.repository.LoanRepository;
-import lombok.RequiredArgsConstructor;
+import BookmyBook.bmb.response.ExceptionResponse;
+import BookmyBook.bmb.security.JwtUtil;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
 @Service
 @Transactional(readOnly = true)
-@RequiredArgsConstructor
 public class LoanService {
 
+    @Autowired
     private final LoanRepository loanRepository;
-    private final UserRepository userRepository;
-    private final BookRepository bookRepository;
+    @Autowired
+    private BookRepository bookRepository;
+    @Autowired
+    private JwtUtil jwtUtil;
 
-    /**
-     * 주문
-     */
- /*   @Transactional
-    public Long order(Long userId, Long itemId, int count){
-
-        //엔티티 조회
-        User user = userRepository.findOne(userId);
-        Book book = bookRepository.findOne(itemId);
-
-        //배송정보 생성
-        Delivery delivery = new Delivery();
-       // delivery.setAddress(user.getAddress());
-        delivery.setStatus(DeliveryStatus.READY);
-
-        //주문상품 생성
-        //OrderItem orderItem = OrderItem.createOrderItem(book, book.getPrice(), count);
-
-        //주문 생성
-       // Order order = Order.createOrder(user, delivery, orderItem);
-
-        //주문 저장
-        //orderRepository.save(order);
-
-        return order.getId();
-    }*/
-
-    /**
-     * 취소
-     */
-  /*  @Transactional
-    public void cancelOrder(Long orderId){
-        //주문 엔티티 조회
-        Wish wish = orderRepository.findOne(orderId);
-
-        //주문 취소
-        wish.cancel();
+    public LoanService(LoanRepository loanRepository) {
+        this.loanRepository = loanRepository;
     }
 
+    //도서 대여
+    @Transactional
+    public Loan loanBook(String isbn, String token) {
+        //book_isbn null 확인
+        if(isbn == null){
+            throw new ExceptionResponse(400, "book_isbn의 값이 필요", "UNDEFINED_ISBN");
+        }
 
-    *//**
-     * 검색
-     *//*
-    public List<Wish> findOrders(OrderSearch orderSearch){
-        return orderRepository.findAllByString(orderSearch);
-    }*/
+        //해당 도서 여부 조회
+        Book book = bookRepository.findByIsbn(isbn);
+        if(book == null){
+            throw new ExceptionResponse(404, "해당 도서 없음", "NOT_FOUND_BOOK");
+        }
 
+        //해당도서의 대출여부확인
+        if (loanRepository.existsByIsbnAndReturnAtIsNull(isbn)) {
+            throw new ExceptionResponse(409, "이미 대출된 도서", "ALREADY_CHECKED_OUT");
+        }
+
+        //user_id 추출
+        String userId = jwtUtil.getUserId(token);
+
+        try{
+            Loan loan = new Loan();
+            loan.setIsbn(isbn);
+            loan.setUserId(userId);
+            loan.setLoan_at(LocalDateTime.now());
+            loan.setReturnAt(null);
+            return loanRepository.save(loan);
+
+        } catch (Exception e){
+            throw new ExceptionResponse(500, "대여 처리 실패", "FAIL_TO_LOAN");
+        }
+
+    }
+
+    //대출여부에 따른 status 업데이트
+    public void updateBookStatus(String user_id, List<String> isbns){
+        //모든 도서 상태를 AVALIABLE로 초기화
+        List<Book> books = bookRepository.findByIsbnIn(isbns);
+        for (Book book: books){
+            BookStatus status = BookStatus.AVAILABLE;
+            //현재 대출 중인 도서 확인
+            Loan loan = loanRepository.findByIsbnAndReturnAtIsNull(book.getIsbn());
+            if(loan != null){
+                if(loan.getUserId().equals(user_id)) status = BookStatus.CHECKED_OUT;
+                else status = BookStatus.UNAVAILABLE;
+            }
+            book.setStatus(status);
+        }
+        bookRepository.saveAll(books);
+    }
+
+    //도서반납
+    @Transactional
+    public Loan returnBook(String user_id, String isbn, String token){
+        //user_id 추출
+        String tokenUser_id = jwtUtil.getUserId(token);
+
+        if(!user_id.equals(tokenUser_id)){
+            throw new ExceptionResponse(403, "유효하지 않은 ID", "MISMATCHED_ID");
+        }
+
+        //대여 정보 조회
+        Loan loan = loanRepository.findByIsbnAndReturnAtIsNull(isbn);
+        if(loan == null || !loan.getUserId().equals(user_id)){
+            throw new ExceptionResponse(404, "대출 기록 또는 권한 없음", "NOT_FOUND_RECORD");
+        }
+
+        //return_at 업데이트
+        try{
+            loan.setReturnAt(LocalDateTime.now());
+            return loanRepository.save(loan);
+        }catch (Exception e){
+            throw new ExceptionResponse(500, "반납 처리 실패", "FAIL_TO_RETURN");
+        }
+    }
 }
