@@ -13,7 +13,7 @@
     public class Book {
 
         @Id
-        @GeneratedValue
+        @GeneratedValue(strategy = GenerationType.IDENTITY)
         private Long id; //도서 고유 ID
 
         @Column(unique = true, length = 13, nullable = false)

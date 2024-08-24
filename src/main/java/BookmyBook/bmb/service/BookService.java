@@ -26,6 +26,7 @@ public class BookService {
 
     private final BookRepository bookRepository;
     private final WishRepository wishRepository;
+    private final LoanService loanService;
     private final JwtUtil jwtUtil;
 
     @Transactional
@@ -47,20 +48,23 @@ public class BookService {
         Page<Book> bookPage = bookRepository.findAll(spec, pageable);
         List<Book> books = bookPage.getContent();
 
-        // 도서 ID 리스트 가져오기
-        List<Long> bookIds = books.stream()
-                .map(Book::getId)
+        // 도서 Isbn 리스트 가져오기
+        List<String> isbns = books.stream()
+                .map(Book::getIsbn)
                 .collect(Collectors.toList());
 
         // 찜 수를 가져오기
-        List<Object[]> wishCounts = wishRepository.countWishesByBookIds(bookIds);
-        Map<Long, Long> wishCountMap = wishCounts.stream()
-                .collect(Collectors.toMap(row -> (Long) row[0], row -> (Long) row[1]));
+        List<Object[]> wishCounts = wishRepository.countWishesByBookIds(isbns);
+        Map<String , Long> wishCountMap = wishCounts.stream()
+                .collect(Collectors.toMap(row -> (String) row[0], row -> (Long) row[1]));
+
+        //도서 status 업데이트
+        loanService.updateBookStatus(user_id, isbns);
 
         // BookDto로 변환
         List<BookDto> bookDtos = books.stream().map(book -> {
-            Long wishCount = wishCountMap.getOrDefault(book.getId(), 0L);
-            boolean wished = user_id != null && wishRepository.existsByBookIdAndUserId(book.getId(), user_id);
+            Long wishCount = wishCountMap.getOrDefault(book.getIsbn(), 0L);
+            boolean wished = user_id != null && wishRepository.existsByBookIdAndUserId(book.getIsbn(), user_id);
             return new BookDto(
                     book.getIsbn(),
                     book.getTitle(),
