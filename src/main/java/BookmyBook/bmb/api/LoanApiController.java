@@ -1,6 +1,7 @@
 package BookmyBook.bmb.api;
 
 import BookmyBook.bmb.domain.Loan;
+import BookmyBook.bmb.response.ApiResponse;
 import BookmyBook.bmb.response.ExceptionResponse;
 import BookmyBook.bmb.response.dto.LoanDto;
 import BookmyBook.bmb.service.LoanService;

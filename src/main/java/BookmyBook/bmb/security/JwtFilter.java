@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 
 public class JwtFilter extends OncePerRequestFilter {
 
@@ -41,13 +42,11 @@ public class JwtFilter extends OncePerRequestFilter {
 
                 if (user_id != null && jwtUtil.validateToken(token, user_id)) {
                     //역할에 따른 권한 설정
-                    Collection<? extends GrantedAuthority> authorities = Collections.singletonList(
-                            new SimpleGrantedAuthority(role.name())
-                    );
+                    Collection<? extends GrantedAuthority> authorities = getAuthorities(role);
 
                     //사용자 아이디으로 인증 객체 생성
                     Authentication authentication = new UsernamePasswordAuthenticationToken(
-                            user_id, null, Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"))
+                            user_id, null, authorities
                     );
                     SecurityContextHolder.getContext().setAuthentication(authentication);
                 } else {
@@ -62,6 +61,19 @@ public class JwtFilter extends OncePerRequestFilter {
             }
         }
         filterChain.doFilter(request, response); // 필터 체인을 계속 진행
+    }
+
+    public Collection<? extends GrantedAuthority> getAuthorities(UserRole role){
+        //역할에 따른 권한 설정
+        if(role == UserRole.ADMIN){
+            return List.of(
+                    new SimpleGrantedAuthority("ROLE_ADMIN"),
+                    new SimpleGrantedAuthority("ROLE_USER")
+            );
+        }else if(role == UserRole.USER){
+            return List.of(new SimpleGrantedAuthority("ROLE_USER"));
+        }
+        return Collections.emptyList();
     }
 
     private void setErrorResponse(HttpServletResponse response, int statusCode, String code, String message) throws IOException {
