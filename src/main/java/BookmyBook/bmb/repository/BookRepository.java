@@ -1,6 +1,7 @@
 package BookmyBook.bmb.repository;
 
 import BookmyBook.bmb.domain.Book;
+import jakarta.persistence.EntityManager;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;

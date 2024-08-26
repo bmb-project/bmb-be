@@ -25,7 +25,7 @@ public class UserApiController {
     @Autowired
     private JwtUtil jwtUtil;
 
-    //회원가입
+    //회원가입 - 참고
     @PostMapping("/user/signup")
     @ResponseBody
     public ResponseEntity<?> singupUser(@RequestBody @Valid CreateUserRequest request){

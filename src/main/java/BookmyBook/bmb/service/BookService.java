@@ -8,6 +8,8 @@ import BookmyBook.bmb.response.BookResponse;
 import BookmyBook.bmb.response.dto.BookDto;
 import BookmyBook.bmb.security.JwtUtil;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -22,8 +24,10 @@ import java.util.stream.Collectors;
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
+@Slf4j
 public class BookService {
 
+    @Autowired
     private final BookRepository bookRepository;
     private final WishRepository wishRepository;
     private final LoanService loanService;
@@ -33,6 +37,7 @@ public class BookService {
     public void saveItem(Book book){
         bookRepository.save(book);
     }
+
 
     //도서 목록 조회
     public BookResponse getBooks(int page, int size, String category, String keyword, String token){
@@ -90,4 +95,27 @@ public class BookService {
 
         return response;
     }
+
+    //도서 추가
+    @Transactional
+    public Book insert(Book book){
+        log.info("bookService - insert Start & End");
+        return bookRepository.save(book);
+    }
+
+    //도서 한 권 상세정보
+    public BookDto view(int id){
+        log.info("bookService - view Start");
+
+        BookDto dto = null;
+        return dto;
+    }
+/*
+    //도서 삭제
+    public Book delete(){
+        Book book;
+        return bookRepository.delete(book);
+    }
+
+ */
 }
