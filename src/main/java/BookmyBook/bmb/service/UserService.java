@@ -1,31 +1,52 @@
 package BookmyBook.bmb.service;
 
 
-import BookmyBook.bmb.domain.User;
+import BookmyBook.bmb.domain.*;
+import BookmyBook.bmb.repository.BookRepository;
+import BookmyBook.bmb.repository.LoanRepository;
 import BookmyBook.bmb.repository.UserRepository;
 
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import BookmyBook.bmb.response.ExceptionResponse;
+import BookmyBook.bmb.response.UserLoanResponse;
+import BookmyBook.bmb.response.dto.UserLoanDto;
 import BookmyBook.bmb.security.JwtUtil;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true)
-@RequiredArgsConstructor
 public class UserService {
 
-    @Autowired
-    private JwtUtil jwtUtil;
+    private final JwtUtil jwtUtil;
     private final UserRepository userRepository;
+    private final BookRepository bookRepository;
+    private final LoanRepository loanRepository;
     private final PasswordEncoder passwordEncoder;
+    private final LoanService loanService;
+
+    @Autowired
+    public UserService(PasswordEncoder passwordEncoder, UserRepository userRepository, JwtUtil jwtUtil,
+                       BookRepository bookRepository, LoanRepository loanRepository, LoanService loanService) {
+        this.passwordEncoder = passwordEncoder;
+        this.jwtUtil = jwtUtil;
+        this.userRepository = userRepository;
+        this.bookRepository = bookRepository;
+        this.loanRepository = loanRepository;
+        this.loanService = loanService;
+    }
 
     private static final Pattern USER_ID_PATTERN = Pattern.compile("^(?=.*[a-zA-Z])(?=.*\\d)[A-Za-z\\d]{4,10}$");
     private static final Pattern NICKNAME_PATTERN = Pattern.compile("^[ぁ-ゔァ-ヴー一-龯a-zA-Z0-9]{2,10}$");
@@ -59,27 +80,21 @@ public class UserService {
     }
 
     //글자 수 제한
-    private void validteFormat(User user){
+    private void validteFormat(User user) {
         Matcher matcherID = USER_ID_PATTERN.matcher(user.getUser_id());
-        if(!matcherID.matches()){
+        if (!matcherID.matches()) {
             throw new ExceptionResponse(400, "id 형식에 맞지 않습니다", "INVALID_ID_FORMAT");
         }
 
         Matcher matcherName = NICKNAME_PATTERN.matcher(user.getNickname());
-        if(!matcherName.matches()){
+        if (!matcherName.matches()) {
             throw new ExceptionResponse(400, "nickname 형식에 맞지 않습니다", "INVALID_NICKNAME_FORMAT");
         }
 
         Matcher matcherPassword = PASSWORD_PATTERN.matcher(user.getPassword());
-        if(!matcherPassword.matches()){
+        if (!matcherPassword.matches()) {
             throw new ExceptionResponse(400, "password 형식에 맞지 않습니다", "INVALID_PASSWORD_FORMAT");
         }
-    }
-
-    @Autowired
-    public UserService(PasswordEncoder passwordEncoder, UserRepository userRepository) {
-        this.passwordEncoder = passwordEncoder;
-        this.userRepository = userRepository;
     }
 
     /**
@@ -125,6 +140,100 @@ public class UserService {
         }
 
         return findUsersById.getFirst();
+    }
+
+    /**
+     * 대여 목록 조회
+     */
+    public UserLoanResponse getUserLoan(int page, int size, String category, String keyword, String token, String user_id){
+        //user_id 추출
+        String tokenUser_id = jwtUtil.getUserId(token);
+
+        if(!tokenUser_id.equals(user_id)){
+            throw new ExceptionResponse(403, "유효하지 않은 ID", "MISMATCHED_ID");
+        }
+
+        //페이징 요청에 따른 페이징 처리
+        Pageable pageable = PageRequest.of(page - 1, size);
+
+        //검색 조건 설정
+        Specification<Book> spec = BookSpecification.byCategoryAndKeyword(category, keyword);
+
+        //도서 목록 조회
+        Page<Book> bookPage;
+        try {
+            bookPage = bookRepository.findAll(spec, pageable);
+        } catch (Exception e) {
+            throw new ExceptionResponse(500, "도서 목록 조회 실패", "BOOK_LIST_FETCH_ERROR");
+        }
+        List<Book> books = bookPage.getContent();
+
+        // 도서 Isbn 리스트 가져오기
+        List<String> isbns = books.stream()
+                .map(Book::getIsbn)
+                .collect(Collectors.toList());
+
+        //도서 status 업데이트
+        try {
+            loanService.updateBookStatus(tokenUser_id, isbns);
+        } catch (Exception e) {
+            throw new ExceptionResponse(500, "도서 상태 업데이트 실패", "BOOK_STATUS_UPDATE_ERROR");
+        }
+
+        // CHECKEDOUT 상태인 책만 필터링
+        books = books.stream()
+                .filter(book -> BookStatus.CHECKED_OUT.equals(book.getStatus()))
+                .toList();
+
+        // 도서의 Isbn 리스트
+        isbns = books.stream()
+                .map(Book::getIsbn)
+                .collect(Collectors.toList());
+
+        // 대여 기록 조회
+        List<Loan> loans;
+        try {
+            loans = loanRepository.findByIsbnIn(isbns);
+        } catch (Exception e) {
+            throw new ExceptionResponse(500, "대여 기록 조회 실패", "LOAN_RECORD_FETCH_ERROR");
+        }
+
+        // ISBN을 키로 하는 대여 기록 맵 생성 (중복 처리)
+        Map<String, Loan> loanMap = loans.stream()
+                .collect(Collectors.toMap(
+                        Loan::getIsbn,
+                        loan -> loan,
+                        (existing, replacement) -> replacement  // 중복된 경우 대체
+                ));
+
+        // BookDto로 변환
+        List<UserLoanDto> bookDtos = books.stream().map(book -> {
+            Loan loan = loanMap.get(book.getIsbn());
+            return new UserLoanDto(
+                    book.getIsbn(),
+                    book.getTitle(),
+                    book.getThumbnail(),
+                    book.getAuthor_name(),
+                    book.getPublisher_name(),
+                    book.getStatus(),
+                    loan.getLoan_at(),
+                    loan.getReturnAt()
+
+            );
+
+        }).toList();
+
+        // 응답 객체 생성
+        UserLoanResponse response = new UserLoanResponse();
+        response.setTotalPages(bookPage.getTotalPages());
+        response.setCurrentPage(pageable.getPageNumber() + 1);
+        response.setPageSize(pageable.getPageSize());
+        response.setTotalItems(bookPage.getTotalElements());
+        response.setCategory(category);
+        response.setKeyword(keyword);
+        response.setBooks(bookDtos);
+
+        return response;
     }
 
     //username 조회

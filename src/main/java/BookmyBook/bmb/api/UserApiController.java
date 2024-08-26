@@ -2,11 +2,9 @@ package BookmyBook.bmb.api;
 
 import BookmyBook.bmb.domain.User;
 import BookmyBook.bmb.domain.UserRole;
-import BookmyBook.bmb.response.ApiResponse;
-import BookmyBook.bmb.response.ExceptionResponse;
+import BookmyBook.bmb.response.*;
 import BookmyBook.bmb.response.dto.UserDto;
 import BookmyBook.bmb.security.JwtUtil;
-import BookmyBook.bmb.response.TokenResponse;
 import BookmyBook.bmb.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -80,6 +78,38 @@ public class UserApiController {
 
         return ResponseEntity.ok(new ApiResponse(200, "회원 조회 성공", userDto));
     }
+
+    //회원별 대여 목록 조회
+    @GetMapping("/user/{id}/loan")
+    @PreAuthorize("hasRole('User') or hasRole('Admin')")
+    public ResponseEntity<?> getUserLoan(
+            @PathVariable("id") String user_id,
+            HttpServletRequest request,
+            @RequestParam(value = "page", defaultValue = "1") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size,
+            @RequestParam(value = "category", required = false) String category,
+            @RequestParam(value = "keyword", required = false) String keyword){
+
+        //Authorization header에서 token 추출
+        String authHeader = request.getHeader("Authorization");
+        if(authHeader == null || !authHeader.startsWith("Bearer")){
+            throw new ExceptionResponse(401, "존재하지 않는 TOKEN", "INVALID_TOKEN");
+        }
+        String token = authHeader.substring(7); //Bearer 제거
+
+        UserLoanResponse userLoanResponse;
+
+
+        //유효성 검사 및 기본값 설정
+        if (page < 1) page = 1;
+        if (size < 1) size = 10;
+
+        //도서 목록 조회
+        userLoanResponse = userService.getUserLoan(page, size, category, keyword, token, user_id);
+
+        return ResponseEntity.ok(new ApiResponse(200, "대여 목록 조회 성공", userLoanResponse));
+    }
+
 
     @Data
     static class CreateUserRequest {
