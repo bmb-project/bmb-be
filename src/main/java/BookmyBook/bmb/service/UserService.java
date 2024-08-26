@@ -126,4 +126,12 @@ public class UserService {
 
         return findUsersById.getFirst();
     }
+
+    //username 조회
+    public String getUsernameById(String userId) {
+        List<User> UserId = userRepository.findByUserID(userId);
+        if(userId.isEmpty()) throw new ExceptionResponse(404, "회원 조회 실패", "FAIL_TO_LOAD");
+
+        return UserId.getFirst().getNickname();
+    }
 }

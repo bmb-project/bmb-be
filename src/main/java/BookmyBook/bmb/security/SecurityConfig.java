@@ -36,7 +36,8 @@ public class SecurityConfig {
                                 .requestMatchers("/user").authenticated() //회원조회
                                 .requestMatchers("/books").authenticated() //도서목록조회
                                 .requestMatchers("/loan").authenticated() //도서대여
-                                .requestMatchers("/loan/{id}").authenticated()//도서반납
+                                .requestMatchers("/loan/{id}").authenticated() //도서반납
+                                .requestMatchers("/admin/books").hasRole("ADMIN") //admin도서목록
                                 .anyRequest().authenticated() // 그 외의 요청은 인증 필요
                 )
                 .addFilterBefore(new JwtFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class)
