@@ -17,7 +17,6 @@ public class UserLoanDto {
     private String publisher_name;
     private BookStatus status;
 
-    //UserLoanList
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Asia/Seoul")
     private LocalDateTime loan_at;
 

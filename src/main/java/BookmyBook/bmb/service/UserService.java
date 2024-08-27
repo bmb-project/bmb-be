@@ -10,9 +10,12 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import BookmyBook.bmb.repository.WishRepository;
 import BookmyBook.bmb.response.ExceptionResponse;
 import BookmyBook.bmb.response.UserLoanResponse;
+import BookmyBook.bmb.response.UserWishResponse;
 import BookmyBook.bmb.response.dto.UserLoanDto;
+import BookmyBook.bmb.response.dto.UserWishDto;
 import BookmyBook.bmb.security.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -34,17 +37,19 @@ public class UserService {
     private final UserRepository userRepository;
     private final BookRepository bookRepository;
     private final LoanRepository loanRepository;
+    private final WishRepository wishRepository;
     private final PasswordEncoder passwordEncoder;
     private final LoanService loanService;
 
     @Autowired
     public UserService(PasswordEncoder passwordEncoder, UserRepository userRepository, JwtUtil jwtUtil,
-                       BookRepository bookRepository, LoanRepository loanRepository, LoanService loanService) {
+                       BookRepository bookRepository, LoanRepository loanRepository, WishRepository wishRepository, LoanService loanService) {
         this.passwordEncoder = passwordEncoder;
         this.jwtUtil = jwtUtil;
         this.userRepository = userRepository;
         this.bookRepository = bookRepository;
         this.loanRepository = loanRepository;
+        this.wishRepository = wishRepository;
         this.loanService = loanService;
     }
 
@@ -218,6 +223,69 @@ public class UserService {
         response.setCategory(category);
         response.setKeyword(keyword);
         response.setBooks(bookDtos);
+
+        return response;
+    }
+
+    /**
+     * 좋아요 목록 조회
+     */
+    public UserWishResponse getUserWish(int page, int size, String category, String keyword, String token, String user_id){
+        //user_id 추출
+        String tokenUser_id = jwtUtil.getUserId(token, "access");
+
+        if(!tokenUser_id.equals(user_id)){
+            throw new ExceptionResponse(403, "유효하지 않은 ID", "MISMATCHED_ID");
+        }
+
+        //페이징 요청에 따른 페이징 처리
+        Pageable pageable = PageRequest.of(page - 1, size);
+
+        //검색 조건 설정
+        Specification<Book> spec = BookSpecification.byCategoryAndKeyword(category, keyword);
+
+        //도서 목록 조회
+        Page<Book> bookPage = bookRepository.findAll(spec, pageable);
+        List<Book> books = bookPage.getContent();
+
+        // 도서 Isbn 리스트 가져오기
+        List<String> isbns = books.stream()
+                .map(Book::getIsbn)
+                .collect(Collectors.toList());
+
+        //도서 status 업데이트
+        loanService.updateBookStatus(tokenUser_id, isbns);
+
+        // Wish 목록 조회
+        List<Wish> wishes = wishRepository.findByUserIdAndIsbns(tokenUser_id, isbns);
+
+        // ISBN을 리스트로 변환
+        List<String> isbnList = wishes.stream()
+                .map(wish -> wish.getBook().getIsbn()).distinct().collect(Collectors.toList());
+
+        // ISBN으로 도서 목록 조회
+        List<Book> wishedBooks = bookRepository.findByIsbnIn(isbnList);
+
+        // 도서 정보를 UserWishDto로 변환
+        List<UserWishDto> wishDtos = wishedBooks.stream().map(book -> new UserWishDto(
+                book.getIsbn(),
+                book.getTitle(),
+                book.getThumbnail(),
+                book.getAuthor_name(),
+                book.getPublisher_name(),
+                book.getStatus()
+
+        )).toList();
+
+        // 응답 객체 생성
+        UserWishResponse response = new UserWishResponse();
+        response.setTotalPages(bookPage.getTotalPages());
+        response.setCurrentPage(pageable.getPageNumber() + 1);
+        response.setPageSize(pageable.getPageSize());
+        response.setTotalItems(bookPage.getTotalElements());
+        response.setCategory(category);
+        response.setKeyword(keyword);
+        response.setBooks(wishDtos);
 
         return response;
     }
