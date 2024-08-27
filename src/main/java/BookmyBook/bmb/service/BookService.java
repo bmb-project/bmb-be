@@ -2,6 +2,7 @@ package BookmyBook.bmb.service;
 
 import BookmyBook.bmb.domain.Book;
 import BookmyBook.bmb.domain.BookSpecification;
+import BookmyBook.bmb.domain.BookStatus;
 import BookmyBook.bmb.repository.BookRepository;
 import BookmyBook.bmb.repository.WishRepository;
 import BookmyBook.bmb.response.BookResponse;
@@ -17,6 +18,8 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -98,24 +101,28 @@ public class BookService {
 
     //도서 추가
     @Transactional
-    public Book insert(Book book){
+    public Book insert(Book book) {
         log.info("bookService - insert Start & End");
         return bookRepository.save(book);
     }
 
     //도서 한 권 상세정보
-    public BookDto view(int id){
-        log.info("bookService - view Start");
-
-        BookDto dto = null;
+    public BookDto view(long id){
+        // 도서를 ID로 조회하고 Optional<Book>로 받음
+        Book book = bookRepository.findById(id);
+        BookDto dto = new BookDto(book.getIsbn(), book.getId(), book.getTitle(), book.getThumbnail(), book.getAuthor_name(),
+                book.getPublisher_name(), book.getStatus(), book.getDescription(),
+                book.getPublished_date(), book.getCreated_at());
+        // Optional의 값이 존재하는 경우 DTO로 변환, 없으면 null 반환
         return dto;
     }
-/*
+
     //도서 삭제
-    public Book delete(){
-        Book book;
-        return bookRepository.delete(book);
+    @Transactional
+    public void delete(long id){
+        Book book = bookRepository.findById(id);
+        bookRepository.deleteById(id);
+        log.info("삭제 완료.");
     }
 
- */
 }
