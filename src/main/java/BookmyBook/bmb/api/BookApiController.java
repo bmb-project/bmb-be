@@ -6,6 +6,7 @@ import BookmyBook.bmb.response.ApiResponse;
 import BookmyBook.bmb.response.BookResponse;
 import BookmyBook.bmb.response.ExceptionResponse;
 import BookmyBook.bmb.response.dto.BookDto;
+import BookmyBook.bmb.security.JwtUtil;
 import BookmyBook.bmb.service.BookService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.Data;
@@ -29,6 +30,7 @@ import java.time.LocalDateTime;
 public class BookApiController {
 
     private final BookService bookService;
+    private final JwtUtil jwtUtil;
 
 
     //도서 목록 조회
@@ -41,12 +43,8 @@ public class BookApiController {
             @RequestParam(value = "category", required = false) String category,
             @RequestParam(value = "keyword", required = false) String keyword) {
 
-        //Authorization header에서 token 추출
-        String authHeader = request.getHeader("Authorization");
-        if(authHeader == null || !authHeader.startsWith("Bearer")){
-            throw new ExceptionResponse(401, "존재하지 않는 TOKEN", "INVALID_TOKEN");
-        }
-        String token = authHeader.substring(7); //Bearer 제거
+        //Cookie에서 Access Token 추출
+        String accessToken = jwtUtil.getTokenFromCookies(request.getCookies(), "accessToken");
 
         BookResponse bookResponse;
         try {
@@ -55,7 +53,7 @@ public class BookApiController {
             if (size < 1) size = 10;
 
             //도서 목록 조회
-            bookResponse = bookService.getBooks(page, size, category, keyword, token);
+            bookResponse = bookService.getBooks(page, size, category, keyword, accessToken);
 
             return ResponseEntity.ok(new ApiResponse(200, "도서 목록 조회 성공", bookResponse));
         } catch (Exception e){

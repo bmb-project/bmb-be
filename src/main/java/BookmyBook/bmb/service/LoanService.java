@@ -49,7 +49,7 @@ public class LoanService {
         }
 
         //user_id 추출
-        String userId = jwtUtil.getUserId(token);
+        String userId = jwtUtil.getUserId(token, "access");
 
         try{
             Loan loan = new Loan();
@@ -86,7 +86,7 @@ public class LoanService {
     @Transactional
     public Loan returnBook(String user_id, String isbn, String token){
         //user_id 추출
-        String tokenUser_id = jwtUtil.getUserId(token);
+        String tokenUser_id = jwtUtil.getUserId(token, "access");
 
         if(!user_id.equals(tokenUser_id)){
             throw new ExceptionResponse(403, "유효하지 않은 ID", "MISMATCHED_ID");
