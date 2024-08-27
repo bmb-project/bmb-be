@@ -11,6 +11,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
@@ -21,7 +22,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 
 @Controller
 @RequiredArgsConstructor
@@ -29,6 +29,7 @@ import java.time.format.DateTimeFormatter;
 public class BookApiController {
 
     private final BookService bookService;
+
 
     //도서 목록 조회
     @GetMapping("/books")
@@ -86,16 +87,70 @@ public class BookApiController {
 
         return ResponseEntity.ok(new ApiResponse(200, "도서 추가 성공", bookDto));
     }
-/*
-    @PostMapping("/books/view") // 도서 한 권 상세 조회
-    @PreAuthorize("hasRole('User') or hasRole('Admin')")
-    public ResponseEntity<?> viewBook(@RequestParam(value = "id") int id){
-        // 도서 갖고 오기
-        bookService.view(id);
 
+    @PostMapping("/books/view") // ID로 도서 한 권 상세 조회
+    @PreAuthorize("hasRole('User') or hasRole('Admin')")
+    public ResponseEntity<?> viewBook(@RequestBody CreateBookRequest request){
+        Long id = request.getId();
+        log.info("/books/view Start : {}", id);
+
+        // 도서 가져오기
+        BookDto bookDto = bookService.view(id);
+
+        // 도서가 존재하지 않을 경우 처리
+        if (bookDto == null) {
+            log.info("도서 ID {}에 해당하는 도서를 찾을 수 없습니다.", id);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new ApiResponse(404, "도서를 찾을 수 없습니다.", null));
+        }
+
+        log.info("/books/view End");
+        log.info("ID : {}", bookDto.getId());
+        log.info("ISBN : {}", bookDto.getIsbn());
+        log.info("Title : {}", bookDto.getTitle());
+        log.info("Author name : {}", bookDto.getAuthor_name());
+        log.info("Publisher name : {}", bookDto.getPublisher_name());
+        log.info("Thumbnail : {}", bookDto.getThumbnail());
+        log.info("Description : {}", bookDto.getDescription());
+        log.info("Published_date : {}", bookDto.getPublished_date());
+        log.info("Created at : {}", bookDto.getCreated_at());
+        log.info("Status : {}", bookDto.getStatus());
         return ResponseEntity.ok(new ApiResponse(200, "도서 가져오기 성공", bookDto));
     }
-*/
+
+    @PostMapping("/books/delete") // ID로 한 권 선택 삭제
+    @PreAuthorize("hasRole('Admin')")
+    public ResponseEntity<?> viewDelete(@RequestBody CreateBookRequest request){
+        Long id = request.getId();
+        log.info("/books/delete Start : {}", id);
+
+        // 도서 가져오기
+        BookDto bookDto = bookService.view(id);
+
+        // 도서가 존재하지 않을 경우 처리
+        if (bookDto == null) {
+            log.info("도서 ID {}에 해당하는 도서를 찾을 수 없습니다.", id);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new ApiResponse(404, "도서를 찾을 수 없습니다.", null));
+        }
+
+        log.info("ID : {}", bookDto.getId());
+        log.info("ISBN : {}", bookDto.getIsbn());
+        log.info("Title : {}", bookDto.getTitle());
+        log.info("Author name : {}", bookDto.getAuthor_name());
+        log.info("Publisher name : {}", bookDto.getPublisher_name());
+        log.info("Thumbnail : {}", bookDto.getThumbnail());
+        log.info("Description : {}", bookDto.getDescription());
+        log.info("Published_date : {}", bookDto.getPublished_date());
+        log.info("Created at : {}", bookDto.getCreated_at());
+        log.info("Status : {}", bookDto.getStatus());
+
+        log.info("Delete Start");
+        bookService.delete(bookDto.getId());
+
+        return ResponseEntity.ok(new ApiResponse(200, "도서 삭제 성공", bookDto));
+    }
+
     @Data
     static class CreateBookRequest {
         private String isbn;
