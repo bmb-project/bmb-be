@@ -2,7 +2,6 @@ package BookmyBook.bmb.api;
 
 import BookmyBook.bmb.domain.User;
 import BookmyBook.bmb.domain.UserRole;
-import BookmyBook.bmb.repository.RefreshTokenRepository;
 import BookmyBook.bmb.response.*;
 import BookmyBook.bmb.response.dto.UserDto;
 import BookmyBook.bmb.security.JwtUtil;
@@ -28,7 +27,6 @@ public class UserApiController {
 
     private final UserService userService;
     private final RefreshTokenService refreshTokenService;
-    private final RefreshTokenRepository refreshTokenRepository;
 
     @Autowired
     private JwtUtil jwtUtil;
@@ -125,7 +123,6 @@ public class UserApiController {
 
         UserLoanResponse userLoanResponse;
 
-
         //유효성 검사 및 기본값 설정
         if (page < 1) page = 1;
         if (size < 1) size = 10;
@@ -134,6 +131,32 @@ public class UserApiController {
         userLoanResponse = userService.getUserLoan(page, size, category, keyword, accessToken, user_id);
 
         return ResponseEntity.ok(new ApiResponse(200, "대여 목록 조회 성공", userLoanResponse));
+    }
+
+    //회원별 대여 목록 조회
+    @GetMapping("/user/{id}/wish")
+    @PreAuthorize("hasRole('User') or hasRole('Admin')")
+    public ResponseEntity<?> getUserWish(
+            @PathVariable("id") String user_id,
+            HttpServletRequest request,
+            @RequestParam(value = "page", defaultValue = "1") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size,
+            @RequestParam(value = "category", required = false) String category,
+            @RequestParam(value = "keyword", required = false) String keyword){
+
+        //Cookie에서 Access Token 추출
+        String accessToken = jwtUtil.getTokenFromCookies(request.getCookies(), "accessToken");
+
+        UserWishResponse userWishResponse;
+
+        //유효성 검사 및 기본값 설정
+        if (page < 1) page = 1;
+        if (size < 1) size = 10;
+
+        //도서 목록 조회
+        userWishResponse = userService.getUserWish(page, size, category, keyword, accessToken, user_id);
+
+        return ResponseEntity.ok(new ApiResponse(200, "좋아요 목록 조회 성공", userWishResponse));
     }
 
 

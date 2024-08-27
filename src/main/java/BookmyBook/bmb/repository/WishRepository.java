@@ -15,4 +15,7 @@ public interface WishRepository extends JpaRepository<Wish, Long> {
     @Query("SELECT COUNT(w) > 0 FROM Wish w WHERE w.book.isbn = :isbn AND w.user.user_id = :userId")
     boolean existsByBookIdAndUserId(@Param("isbn") String  isbn, @Param("userId") String userId);
 
+    @Query("SELECT w FROM Wish w WHERE w.user.user_id = :userId AND w.book.isbn IN :isbns")
+    List<Wish> findByUserIdAndIsbns(@Param("userId") String userId, @Param("isbns") List<String> isbns);
+
 }
