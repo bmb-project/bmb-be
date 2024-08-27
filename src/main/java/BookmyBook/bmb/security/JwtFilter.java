@@ -29,18 +29,22 @@ public class JwtFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws jakarta.servlet.ServletException, IOException{
-        // Authorization 헤더에서 토큰 추출
-        String token = request.getHeader("Authorization");
+        // 공개된 엔드포인트를 체크하여 인증을 요구하지 않는 경우
+        if (isPublicEndpoint(request.getRequestURI())) {
+            filterChain.doFilter(request, response); // 필터 체인을 계속 진행
+            return;
+        }
 
-        // 토큰이 존재하고 "Bearer "로 시작하는 경우
-        if (token != null && token.startsWith("Bearer ")) {
-            token = token.substring(7); // "Bearer "를 제거한 실제 토큰
+        // 쿠키에서 토큰 추출
+        String accessToken = jwtUtil.getTokenFromCookies(request.getCookies(), "accessToken");
+
+        if (accessToken != null) {
             try {
-                String user_id = jwtUtil.getUserId(token);
-                String roleString = jwtUtil.getRole(token);
+                String user_id = jwtUtil.getUserId(accessToken, "access");
+                String roleString = jwtUtil.getRole(accessToken);
                 UserRole role = UserRole.valueOf(roleString);
 
-                if (user_id != null && jwtUtil.validateToken(token, user_id)) {
+                if (user_id != null && jwtUtil.validateToken(accessToken, user_id, "access")) {
                     //역할에 따른 권한 설정
                     Collection<? extends GrantedAuthority> authorities = getAuthorities(role);
 
@@ -51,16 +55,26 @@ public class JwtFilter extends OncePerRequestFilter {
                     SecurityContextHolder.getContext().setAuthentication(authentication);
                 } else {
                     // 유효하지 않은 토큰인 경우
-                    setErrorResponse(response, HttpServletResponse.SC_FORBIDDEN, "INVALID_TOKEN", "존재하지 않는 TOKEN");
+                    setErrorResponse(response, HttpServletResponse.SC_FORBIDDEN, "INVALID_TOKEN", "존재하지 않는 token");
                     return;
                 }
             } catch (Exception e){
                 // 예외를 로그로 기록하고 403 오류를 반환합니다
+                System.out.println(e.getMessage());
                 setErrorResponse(response, HttpServletResponse.SC_FORBIDDEN, "AUTHENTICATION_ERROR", "권한 없음");
                 return;
             }
+        }else {
+            // 액세스 토큰이 없을 경우 처리
+            setErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED, "NO_TOKEN", "token 없음");
+            return;
         }
         filterChain.doFilter(request, response); // 필터 체인을 계속 진행
+    }
+
+    private boolean isPublicEndpoint(String requestUri) {
+        // 공개된 엔드포인트를 정의
+        return requestUri.startsWith("/user/signin") || requestUri.startsWith("/user/signup");
     }
 
     public Collection<? extends GrantedAuthority> getAuthorities(UserRole role){

@@ -2,7 +2,6 @@ package BookmyBook.bmb.service;
 
 import BookmyBook.bmb.domain.Book;
 import BookmyBook.bmb.domain.BookSpecification;
-import BookmyBook.bmb.domain.BookStatus;
 import BookmyBook.bmb.repository.BookRepository;
 import BookmyBook.bmb.repository.WishRepository;
 import BookmyBook.bmb.response.BookResponse;
@@ -10,7 +9,6 @@ import BookmyBook.bmb.response.dto.BookDto;
 import BookmyBook.bmb.security.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -18,8 +16,6 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -30,7 +26,6 @@ import java.util.stream.Collectors;
 @Slf4j
 public class BookService {
 
-    @Autowired
     private final BookRepository bookRepository;
     private final WishRepository wishRepository;
     private final LoanService loanService;
@@ -50,7 +45,7 @@ public class BookService {
         //검색 조건 설정
         Specification<Book> spec = BookSpecification.byCategoryAndKeyword(category, keyword);
 
-        String user_id = jwtUtil.getUserId(token);
+        String user_id = jwtUtil.getUserId(token, "access");
 
         //도서 목록 조회
         Page<Book> bookPage = bookRepository.findAll(spec, pageable);

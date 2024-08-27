@@ -127,7 +127,7 @@ public class UserService {
      * 회원 정보 조회
      */
     public User findOne(String token){
-        String userId = jwtUtil.getUserId(token);
+        String userId = jwtUtil.getUserId(token, "access");
 
         if(userId == null){
             throw new ExceptionResponse(401, "존재하지 않는 TOKEN", "INVALID_TOKEN");
@@ -147,7 +147,7 @@ public class UserService {
      */
     public UserLoanResponse getUserLoan(int page, int size, String category, String keyword, String token, String user_id){
         //user_id 추출
-        String tokenUser_id = jwtUtil.getUserId(token);
+        String tokenUser_id = jwtUtil.getUserId(token, "access");
 
         if(!tokenUser_id.equals(user_id)){
             throw new ExceptionResponse(403, "유효하지 않은 ID", "MISMATCHED_ID");
@@ -160,12 +160,7 @@ public class UserService {
         Specification<Book> spec = BookSpecification.byCategoryAndKeyword(category, keyword);
 
         //도서 목록 조회
-        Page<Book> bookPage;
-        try {
-            bookPage = bookRepository.findAll(spec, pageable);
-        } catch (Exception e) {
-            throw new ExceptionResponse(500, "도서 목록 조회 실패", "BOOK_LIST_FETCH_ERROR");
-        }
+        Page<Book> bookPage = bookRepository.findAll(spec, pageable);
         List<Book> books = bookPage.getContent();
 
         // 도서 Isbn 리스트 가져오기
@@ -174,11 +169,7 @@ public class UserService {
                 .collect(Collectors.toList());
 
         //도서 status 업데이트
-        try {
-            loanService.updateBookStatus(tokenUser_id, isbns);
-        } catch (Exception e) {
-            throw new ExceptionResponse(500, "도서 상태 업데이트 실패", "BOOK_STATUS_UPDATE_ERROR");
-        }
+        loanService.updateBookStatus(tokenUser_id, isbns);
 
         // CHECKEDOUT 상태인 책만 필터링
         books = books.stream()
@@ -191,12 +182,7 @@ public class UserService {
                 .collect(Collectors.toList());
 
         // 대여 기록 조회
-        List<Loan> loans;
-        try {
-            loans = loanRepository.findByIsbnIn(isbns);
-        } catch (Exception e) {
-            throw new ExceptionResponse(500, "대여 기록 조회 실패", "LOAN_RECORD_FETCH_ERROR");
-        }
+        List<Loan> loans = loanRepository.findByIsbnIn(isbns);
 
         // ISBN을 키로 하는 대여 기록 맵 생성 (중복 처리)
         Map<String, Loan> loanMap = loans.stream()
@@ -242,5 +228,13 @@ public class UserService {
         if(userId.isEmpty()) throw new ExceptionResponse(404, "회원 조회 실패", "FAIL_TO_LOAD");
 
         return UserId.getFirst().getNickname();
+    }
+
+    //Role 조회
+    public UserRole getRoleById(String userId){
+        List<User> UserId = userRepository.findByUserID(userId);
+        if(userId.isEmpty()) throw new ExceptionResponse(404, "회원 조회 실패", "FAIL_TO_LOAD");
+
+        return UserId.getFirst().getRole();
     }
 }

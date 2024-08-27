@@ -43,7 +43,7 @@ public class AdminService {
         //검색 조건 설정
         Specification<Book> spec = BookSpecification.byCategoryAndKeyword(category, keyword);
 
-        String user_id = jwtUtil.getUserId(token);
+        String user_id = jwtUtil.getUserId(token, "access");
 
         //도서 목록 조회
         Page<Book> bookPage = bookRepository.findAll(spec, pageable);

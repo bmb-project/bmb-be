@@ -1,7 +1,6 @@
 package BookmyBook.bmb.domain;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -17,20 +16,16 @@ public class User{
     @Id  @GeneratedValue(strategy = GenerationType.IDENTITY) //@Id: primary key @GeneratedValue : 값 자동 생성
     private Long id; //사용자 고유 ID
 
-    @Column(name = "user_id", unique = true, length = 10)
-    @NotNull
+    @Column(name = "user_id", unique = true, length = 10, nullable = false)
     private String user_id; //사용자 ID
 
-    @Column(unique = true, length = 10)
-    @NotNull
+    @Column(unique = true, length = 10, nullable = false)
     private String nickname; //사용자 이름
 
-    @Column(length = 60)
-    @NotNull
+    @Column(length = 60, nullable = false)
     private String password; //비밀번호
 
-    @Column(updatable = false)
-    @NotNull
+    @Column(updatable = false, nullable = false)
     private LocalDateTime created_at; //가입 일시
 
     @Enumerated(EnumType.STRING)
@@ -43,8 +38,4 @@ public class User{
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<Wish> wishes = new ArrayList<>(); // User가 가진 Wish 목록
-
-
-   /* @OneToMany(mappedBy = "user")
-    private List<Order> orders = new ArrayList<>();*/
 }
