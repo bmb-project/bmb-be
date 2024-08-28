@@ -13,7 +13,7 @@ import static jakarta.persistence.FetchType.*;
 @Entity
 @Table(name = "Wish")
 @Getter @Setter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor(access = AccessLevel.PUBLIC)
 public class Wish {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)

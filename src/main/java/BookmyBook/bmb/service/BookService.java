@@ -2,14 +2,17 @@ package BookmyBook.bmb.service;
 
 import BookmyBook.bmb.domain.Book;
 import BookmyBook.bmb.domain.BookSpecification;
+import BookmyBook.bmb.domain.Wish;
 import BookmyBook.bmb.repository.BookRepository;
 import BookmyBook.bmb.repository.WishRepository;
 import BookmyBook.bmb.response.BookResponse;
+import BookmyBook.bmb.response.ExceptionResponse;
 import BookmyBook.bmb.response.dto.BookDto;
 import BookmyBook.bmb.response.dto.WishDto;
 import BookmyBook.bmb.security.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -17,6 +20,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -31,11 +35,6 @@ public class BookService {
     private final WishRepository wishRepository;
     private final LoanService loanService;
     private final JwtUtil jwtUtil;
-
-    @Transactional
-    public void saveItem(Book book){
-        bookRepository.save(book);
-    }
 
     //도서 목록 조회
     public BookResponse getBooks(int page, int size, String category, String keyword, String token){
@@ -111,6 +110,42 @@ public class BookService {
                 wishCount,
                 wished
         );
+    }
+
+    //좋아요 하기
+    @Transactional
+    public WishDto saveWish(String isbn, String token){
+        String user_id = jwtUtil.getUserId(token, "access");
+
+        try {
+            boolean wishExists = wishRepository.existsByBookIdAndUserId(isbn, user_id);
+            if(wishExists) throw new ExceptionResponse(409, "좋아요 실패", "WISH_ALREADY_EXISTS");
+
+            // Create a new Wish entity
+            Wish wish = new Wish();
+            wish.setUserId(user_id);
+            wish.setIsbn(isbn);
+            wish.setAdded_at(LocalDateTime.now());
+
+            // Save the new wish
+            wishRepository.save(wish);
+
+            //도서 status 업데이트
+            loanService.updateBookStatus(user_id, isbn);
+
+            // 찜 수 가져오기
+            Long wishCount = wishRepository.countWishesByIsbn(isbn);
+
+            // 사용자가 찜했는지 여부 확인
+            boolean wished = user_id != null && wishRepository.existsByBookIdAndUserId(isbn, user_id);
+
+            return new WishDto(
+                    wishCount,
+                    wished
+            );
+        }catch (DataIntegrityViolationException e){
+            throw new ExceptionResponse(400, "잘못된 isbn", "INVALID_ISBN");
+        }
     }
 
     //도서 추가
