@@ -129,34 +129,11 @@ public class UserService {
     }
 
     /**
-     * 회원 정보 조회
-     */
-    public User findOne(String token){
-        String userId = jwtUtil.getUserId(token, "access");
-
-        if(userId == null){
-            throw new ExceptionResponse(401, "존재하지 않는 TOKEN", "INVALID_TOKEN");
-        }
-
-        List<User> findUsersById = userRepository.findByUserID(userId);
-
-        if(findUsersById.isEmpty()){
-            throw new ExceptionResponse(404, "회원 조회 실패", "FAIL_TO_LOAD");
-        }
-
-        return findUsersById.getFirst();
-    }
-
-    /**
      * 대여 목록 조회
      */
-    public UserLoanResponse getUserLoan(int page, int size, String category, String keyword, String token, String user_id){
+    public UserLoanResponse getUserLoan(int page, int size, String category, String keyword, String token){
         //user_id 추출
         String tokenUser_id = jwtUtil.getUserId(token, "access");
-
-        if(!tokenUser_id.equals(user_id)){
-            throw new ExceptionResponse(403, "유효하지 않은 ID", "MISMATCHED_ID");
-        }
 
         //페이징 요청에 따른 페이징 처리
         Pageable pageable = PageRequest.of(page - 1, size);
@@ -230,13 +207,9 @@ public class UserService {
     /**
      * 좋아요 목록 조회
      */
-    public UserWishResponse getUserWish(int page, int size, String category, String keyword, String token, String user_id){
+    public UserWishResponse getUserWish(int page, int size, String category, String keyword, String token){
         //user_id 추출
         String tokenUser_id = jwtUtil.getUserId(token, "access");
-
-        if(!tokenUser_id.equals(user_id)){
-            throw new ExceptionResponse(403, "유효하지 않은 ID", "MISMATCHED_ID");
-        }
 
         //페이징 요청에 따른 페이징 처리
         Pageable pageable = PageRequest.of(page - 1, size);

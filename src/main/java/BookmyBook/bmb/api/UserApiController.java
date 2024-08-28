@@ -91,27 +91,10 @@ public class UserApiController {
         return ResponseEntity.ok(new ApiResponse(200, "로그인 성공", userDto));
     }
 
-    //회원 정보 조회
-    @GetMapping("/user")
-    @PreAuthorize("hasRole('User') or hasRole('Admin')")
-    public ResponseEntity<?> getUserList(HttpServletRequest request){
-
-        //Cookie에서 Access Token 추출
-        String accessToken = jwtUtil.getTokenFromCookies(request.getCookies(), "accessToken");
-
-        //JWT token에서 사용자 정보 조회
-        User user = userService.findOne(accessToken);
-
-        UserDto userDto = new UserDto(user.getUser_id(), user.getNickname(), user.getRole());
-
-        return ResponseEntity.ok(new ApiResponse(200, "회원 조회 성공", userDto));
-    }
-
     //회원별 대여 목록 조회
-    @GetMapping("/user/{id}/loan")
+    @GetMapping("/user/loan")
     @PreAuthorize("hasRole('User') or hasRole('Admin')")
     public ResponseEntity<?> getUserLoan(
-            @PathVariable("id") String user_id,
             HttpServletRequest request,
             @RequestParam(value = "page", defaultValue = "1") int page,
             @RequestParam(value = "size", defaultValue = "10") int size,
@@ -128,16 +111,15 @@ public class UserApiController {
         if (size < 1) size = 10;
 
         //도서 목록 조회
-        userLoanResponse = userService.getUserLoan(page, size, category, keyword, accessToken, user_id);
+        userLoanResponse = userService.getUserLoan(page, size, category, keyword, accessToken);
 
         return ResponseEntity.ok(new ApiResponse(200, "대여 목록 조회 성공", userLoanResponse));
     }
 
     //회원별 좋아요 목록 조회
-    @GetMapping("/user/{id}/wish")
+    @GetMapping("/user/wish")
     @PreAuthorize("hasRole('User') or hasRole('Admin')")
     public ResponseEntity<?> getUserWish(
-            @PathVariable("id") String user_id,
             HttpServletRequest request,
             @RequestParam(value = "page", defaultValue = "1") int page,
             @RequestParam(value = "size", defaultValue = "10") int size,
@@ -154,7 +136,7 @@ public class UserApiController {
         if (size < 1) size = 10;
 
         //도서 목록 조회
-        userWishResponse = userService.getUserWish(page, size, category, keyword, accessToken, user_id);
+        userWishResponse = userService.getUserWish(page, size, category, keyword, accessToken);
 
         return ResponseEntity.ok(new ApiResponse(200, "좋아요 목록 조회 성공", userWishResponse));
     }

@@ -36,16 +36,16 @@ public class LoanApiController {
     }
 
     //도서 반납
-    @PutMapping("/loan/{id}")
+    @PutMapping("/loan")
     @PreAuthorize("hasRole('User') or hasRole('Admin')")
-    public ResponseEntity<?> returnBook(@PathVariable("id") String user_id, @RequestBody Map<String, String> request, HttpServletRequest httpRequest){
+    public ResponseEntity<?> returnBook(@RequestBody Map<String, String> request, HttpServletRequest httpRequest){
 
         //Cookie에서 Access Token 추출
         String accessToken = jwtUtil.getTokenFromCookies(httpRequest.getCookies(), "accessToken");
         String book_isbn = request.get("book_isbn");
 
 
-        Loan loan = loanService.returnBook(user_id, book_isbn, accessToken);
+        Loan loan = loanService.returnBook(book_isbn, accessToken);
 
         LoanDto loanDto = new LoanDto(loan.getIsbn(), loan.getUserId(), loan.getLoan_at(), loan.getReturnAt());
         return ResponseEntity.ok(new ApiResponse(200, "도서 반납 성공", loanDto));

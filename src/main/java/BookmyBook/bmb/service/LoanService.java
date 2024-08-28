@@ -103,17 +103,13 @@ public class LoanService {
 
     //도서반납
     @Transactional
-    public Loan returnBook(String user_id, String isbn, String token){
+    public Loan returnBook(String isbn, String token){
         //user_id 추출
         String tokenUser_id = jwtUtil.getUserId(token, "access");
 
-        if(!user_id.equals(tokenUser_id)){
-            throw new ExceptionResponse(403, "유효하지 않은 ID", "MISMATCHED_ID");
-        }
-
         //대여 정보 조회
-        Loan loan = loanRepository.findByIsbnAndReturnAtIsNull(isbn);
-        if(loan == null || !loan.getUserId().equals(user_id)){
+        Loan loan = loanRepository.findByIsbnAndReturnAtIsNullAndUserId(isbn, tokenUser_id);
+        if(loan == null){
             throw new ExceptionResponse(404, "대출 기록 또는 권한 없음", "NOT_FOUND_RECORD");
         }
 
