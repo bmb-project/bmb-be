@@ -82,6 +82,25 @@ public class LoanService {
         bookRepository.saveAll(books);
     }
 
+    //대출여부에 따른 status 업데이트
+    public void updateBookStatus(String user_id, String isbn){
+        //모든 도서 상태를 AVALIABLE로 초기화
+        List<Book> books = bookRepository.findListByIsbn(isbn);
+        if(books.isEmpty()) throw new ExceptionResponse(404, "해당 isbn의 책 없음", "NOT_FOUNDED_ISBN");
+
+        for (Book book: books){
+            BookStatus status = BookStatus.AVAILABLE;
+            //현재 대출 중인 도서 확인
+            Loan loan = loanRepository.findByIsbnAndReturnAtIsNull(book.getIsbn());
+            if(loan != null){
+                if(loan.getUserId().equals(user_id)) status = BookStatus.CHECKED_OUT;
+                else status = BookStatus.UNAVAILABLE;
+            }
+            book.setStatus(status);
+        }
+        bookRepository.saveAll(books);
+    }
+
     //도서반납
     @Transactional
     public Loan returnBook(String user_id, String isbn, String token){

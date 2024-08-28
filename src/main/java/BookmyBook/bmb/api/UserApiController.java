@@ -133,7 +133,7 @@ public class UserApiController {
         return ResponseEntity.ok(new ApiResponse(200, "대여 목록 조회 성공", userLoanResponse));
     }
 
-    //회원별 대여 목록 조회
+    //회원별 좋아요 목록 조회
     @GetMapping("/user/{id}/wish")
     @PreAuthorize("hasRole('User') or hasRole('Admin')")
     public ResponseEntity<?> getUserWish(

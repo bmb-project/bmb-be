@@ -11,6 +11,7 @@ import java.util.List;
 public interface BookRepository extends JpaRepository<Book, Long>, JpaSpecificationExecutor<Book> {
     // Specification과 Pageable을 사용하는 메소드가 자동으로 제공됩니다.
     Book findByIsbn(String isbn);
+    List<Book> findListByIsbn(String isbn);
     List<Book> findByIsbnIn(List<String> isbns);
     Book findById(long id);
     List<Book> findByIdIn(List<String> id);

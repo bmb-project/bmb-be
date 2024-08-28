@@ -6,6 +6,7 @@ import BookmyBook.bmb.response.ApiResponse;
 import BookmyBook.bmb.response.BookResponse;
 import BookmyBook.bmb.response.ExceptionResponse;
 import BookmyBook.bmb.response.dto.BookDto;
+import BookmyBook.bmb.response.dto.WishDto;
 import BookmyBook.bmb.security.JwtUtil;
 import BookmyBook.bmb.service.BookService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -16,10 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -59,6 +57,22 @@ public class BookApiController {
         } catch (Exception e){
             throw new ExceptionResponse(404, "도서 목록 조회 실패", "FAIL_TO_LOAD");
         }
+    }
+
+    //도서별 좋아요 목록 조회
+    @GetMapping("/books/{isbn}/wish")
+    @PreAuthorize("hasRole('User') or hasRole('Admin')")
+    public ResponseEntity<?> getUserWish(
+            @PathVariable("isbn") String isbn,
+            HttpServletRequest request){
+
+        //Cookie에서 Access Token 추출
+        String accessToken = jwtUtil.getTokenFromCookies(request.getCookies(), "accessToken");
+
+        //도서 목록 조회
+        WishDto wishDto = bookService.getBookWish(accessToken, isbn);
+
+        return ResponseEntity.ok(new ApiResponse(200, "좋아요 목록 조회 성공", wishDto));
     }
 
     @PostMapping("/books/insert") // 도서 추가
