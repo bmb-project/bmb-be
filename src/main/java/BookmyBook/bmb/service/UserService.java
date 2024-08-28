@@ -113,7 +113,6 @@ public class UserService {
 
     //회원 등록 여부 확인
     public User checkExistUser(User user){
-        // 사용자가 입력한 비밀번호를 직접적으로 암호화하지 않음
         List<User> findUsersById = userRepository.findByUserID(user.getUser_id());
         if(findUsersById.isEmpty()){
             throw new ExceptionResponse(401,"로그인 실패", "INVALID_ID_OR_PASSWORD");

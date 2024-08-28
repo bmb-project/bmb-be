@@ -30,7 +30,6 @@ public class BookApiController {
     private final BookService bookService;
     private final JwtUtil jwtUtil;
 
-
     //도서 목록 조회
     @GetMapping("/books")
     @PreAuthorize("hasRole('User') or hasRole('Admin')") // 참고
@@ -62,9 +61,7 @@ public class BookApiController {
     //도서별 좋아요 목록 조회
     @GetMapping("/books/{isbn}/wish")
     @PreAuthorize("hasRole('User') or hasRole('Admin')")
-    public ResponseEntity<?> getUserWish(
-            @PathVariable("isbn") String isbn,
-            HttpServletRequest request){
+    public ResponseEntity<?> getUserWish(@PathVariable("isbn") String isbn, HttpServletRequest request){
 
         //Cookie에서 Access Token 추출
         String accessToken = jwtUtil.getTokenFromCookies(request.getCookies(), "accessToken");
@@ -73,6 +70,20 @@ public class BookApiController {
         WishDto wishDto = bookService.getBookWish(accessToken, isbn);
 
         return ResponseEntity.ok(new ApiResponse(200, "좋아요 목록 조회 성공", wishDto));
+    }
+
+    //도서 좋아요 하기
+    @PostMapping("/books/{isbn}/wish")
+    @PreAuthorize("hasRole('User') or hasRole('Admin')")
+    public ResponseEntity<?> booksWish(@PathVariable("isbn") String isbn, HttpServletRequest request){
+
+        //Cookie에서 Access Token 추출
+        String accessToken = jwtUtil.getTokenFromCookies(request.getCookies(), "accessToken");
+
+        //좋아요 등록
+        WishDto wishDto = bookService.saveWish(isbn, accessToken);
+
+        return ResponseEntity.ok(new ApiResponse(201, "좋아요 성공", wishDto));
     }
 
     @PostMapping("/books/insert") // 도서 추가

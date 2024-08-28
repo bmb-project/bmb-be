@@ -44,6 +44,7 @@ public class SecurityConfig {
                                 .requestMatchers("/user/wish").authenticated() //회원별좋아요목록조회
                                 .requestMatchers("/books").authenticated() //도서목록조회
                                 .requestMatchers("/books/{isbn}/wish").authenticated() //도서별좋아요목록조회
+                                .requestMatchers("/books/{isbn}/wish").authenticated() //도서별좋아요하기
                                 .requestMatchers("/loan").authenticated() //도서대여
                                 .requestMatchers("/loan").authenticated() //도서반납
                                 .requestMatchers("/admin/books").hasRole("ADMIN") //admin도서목록
