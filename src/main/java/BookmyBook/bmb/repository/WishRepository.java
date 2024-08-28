@@ -2,6 +2,7 @@ package BookmyBook.bmb.repository;
 
 import BookmyBook.bmb.domain.Wish;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -20,4 +21,8 @@ public interface WishRepository extends JpaRepository<Wish, Long> {
 
     @Query("SELECT w FROM Wish w WHERE w.user.user_id = :userId AND w.book.isbn IN :isbns")
     List<Wish> findByUserIdAndIsbns(@Param("userId") String userId, @Param("isbns") List<String> isbns);
+
+    @Modifying
+    @Query("DELETE FROM Wish w WHERE w.isbn = :isbn AND w.userId = :userId")
+    void deleteByBookIdAndUserId(@Param("isbn") String isbn, @Param("userId") String userId);
 }
