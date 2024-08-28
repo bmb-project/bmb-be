@@ -116,13 +116,13 @@ public class UserService {
         // 사용자가 입력한 비밀번호를 직접적으로 암호화하지 않음
         List<User> findUsersById = userRepository.findByUserID(user.getUser_id());
         if(findUsersById.isEmpty()){
-            throw new ExceptionResponse(401,"로그인 실패", "INVALID_CREDENTIALS");
+            throw new ExceptionResponse(401,"로그인 실패", "INVALID_ID_OR_PASSWORD");
         }
 
         User findUser = findUsersById.getFirst();
         //저장된 암호화 비밀번호와 입력된 비밀번호 비교
         if(!passwordEncoder.matches(user.getPassword(), findUser.getPassword())){
-            throw new ExceptionResponse(401,"로그인 실패", "INVALID_CREDENTIALS");
+            throw new ExceptionResponse(401,"로그인 실패", "INVALID_ID_OR_PASSWORD");
         }
 
         return findUser;
