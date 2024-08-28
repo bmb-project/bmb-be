@@ -6,6 +6,7 @@ import BookmyBook.bmb.repository.BookRepository;
 import BookmyBook.bmb.repository.WishRepository;
 import BookmyBook.bmb.response.BookResponse;
 import BookmyBook.bmb.response.dto.BookDto;
+import BookmyBook.bmb.response.dto.WishDto;
 import BookmyBook.bmb.security.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -35,7 +36,6 @@ public class BookService {
     public void saveItem(Book book){
         bookRepository.save(book);
     }
-
 
     //도서 목록 조회
     public BookResponse getBooks(int page, int size, String category, String keyword, String token){
@@ -92,6 +92,25 @@ public class BookService {
         response.setBooks(bookDtos);
 
         return response;
+    }
+
+    //도서별 좋아요 조회
+    public WishDto getBookWish(String token, String isbn){
+        String user_id = jwtUtil.getUserId(token, "access");
+
+        //도서 status 업데이트
+        loanService.updateBookStatus(user_id, isbn);
+
+        // 찜 수 가져오기
+        Long wishCount = wishRepository.countWishesByIsbn(isbn);
+
+        // 사용자가 찜했는지 여부 확인
+        boolean wished = user_id != null && wishRepository.existsByBookIdAndUserId(isbn, user_id);
+
+        return new WishDto(
+                wishCount,
+                wished
+        );
     }
 
     //도서 추가

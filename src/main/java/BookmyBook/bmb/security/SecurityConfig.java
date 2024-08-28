@@ -42,6 +42,7 @@ public class SecurityConfig {
                                 .requestMatchers("/user/signup").permitAll() // 회원가입 API
                                 .requestMatchers("/user").authenticated() //회원조회
                                 .requestMatchers("/books").authenticated() //도서목록조회
+                                .requestMatchers("/books/{isbn}/wish").authenticated() //도서별좋아요목록조회
                                 .requestMatchers("/user/{id}/loan").authenticated() //회원별도서목록조회
                                 .requestMatchers("/user/{id}/wish").authenticated() //회원별좋아요목록조회
                                 .requestMatchers("/loan").authenticated() //도서대여
