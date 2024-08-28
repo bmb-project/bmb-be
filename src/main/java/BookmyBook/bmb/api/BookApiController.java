@@ -86,6 +86,19 @@ public class BookApiController {
         return ResponseEntity.ok(new ApiResponse(201, "좋아요 성공", wishDto));
     }
 
+    @DeleteMapping("/books/{isbn}/wish")
+    @PreAuthorize("hasRole('User') or hasRole('Admin')")
+    public ResponseEntity<?> deleteWish(@PathVariable("isbn") String isbn, HttpServletRequest request){
+
+        //Cookie에서 Access Token 추출
+        String accessToken = jwtUtil.getTokenFromCookies(request.getCookies(), "accessToken");
+
+        //좋아요 취소
+        WishDto wishDto = bookService.deleteWish(isbn, accessToken);
+
+        return ResponseEntity.ok(new ApiResponse(200, "좋아요 취소 성공", wishDto));
+    }
+
     @PostMapping("/books/insert") // 도서 추가
     @PreAuthorize("hasRole('Admin')")
     public ResponseEntity<?> insertBook(@RequestBody CreateBookRequest request){

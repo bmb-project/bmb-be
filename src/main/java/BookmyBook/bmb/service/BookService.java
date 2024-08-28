@@ -148,6 +148,33 @@ public class BookService {
         }
     }
 
+    //좋아요 취소
+    @Transactional
+    public WishDto deleteWish(String isbn, String token){
+        String user_id = jwtUtil.getUserId(token, "access");
+
+        try {
+            boolean wishExists = wishRepository.existsByBookIdAndUserId(isbn, user_id);
+            if(!wishExists) throw new ExceptionResponse(404, "좋아요 취소 실패", "WISH_NOT_FOUND");
+
+            // Delete the wish
+            wishRepository.deleteByBookIdAndUserId(isbn, user_id);
+
+            // Get the updated number of wishes for the book
+            Long wishCount = wishRepository.countWishesByIsbn(isbn);
+
+            // 사용자가 찜했는지 여부 확인
+            boolean wished = user_id != null && wishRepository.existsByBookIdAndUserId(isbn, user_id);
+
+            return new WishDto(
+                    wishCount,
+                    wished
+            );
+        }catch (Exception e){
+            throw new ExceptionResponse(400, "잘못된 isbn", "INVALID_ISBN");
+        }
+    }
+
     //도서 추가
     @Transactional
     public Book insert(Book book) {

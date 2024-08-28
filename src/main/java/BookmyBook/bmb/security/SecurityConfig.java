@@ -43,10 +43,8 @@ public class SecurityConfig {
                                 .requestMatchers("/user/loan").authenticated() //회원별도서목록조회
                                 .requestMatchers("/user/wish").authenticated() //회원별좋아요목록조회
                                 .requestMatchers("/books").authenticated() //도서목록조회
-                                .requestMatchers("/books/{isbn}/wish").authenticated() //도서별좋아요목록조회
-                                .requestMatchers("/books/{isbn}/wish").authenticated() //도서별좋아요하기
-                                .requestMatchers("/loan").authenticated() //도서대여
-                                .requestMatchers("/loan").authenticated() //도서반납
+                                .requestMatchers("/books/{isbn}/wish").authenticated() //도서별좋아요목록조회, 도서좋아요하기, 도서좋아요취소
+                                .requestMatchers("/loan").authenticated() //도서대여, 도서반납
                                 .requestMatchers("/admin/books").hasRole("ADMIN") //admin도서목록
                                 .anyRequest().authenticated() // 그 외의 요청은 인증 필요
                 )
