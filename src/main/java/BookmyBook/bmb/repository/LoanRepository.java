@@ -10,5 +10,6 @@ import java.util.List;
 public interface LoanRepository extends JpaRepository<Loan, Long> {
     boolean existsByIsbnAndReturnAtIsNull(String isbn);
     Loan findByIsbnAndReturnAtIsNull(String isbn);
+    Loan findByIsbnAndReturnAtIsNullAndUserId(String isbn, String userId);
     List<Loan> findByIsbnIn(List<String> isbns);
 }

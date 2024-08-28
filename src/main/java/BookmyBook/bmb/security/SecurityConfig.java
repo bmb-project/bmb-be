@@ -40,13 +40,12 @@ public class SecurityConfig {
                         authorizeRequests
                                 .requestMatchers("/user/signin").permitAll() // 로그인 API는 인증 없이 접근 가능
                                 .requestMatchers("/user/signup").permitAll() // 회원가입 API
-                                .requestMatchers("/user").authenticated() //회원조회
+                                .requestMatchers("/user/loan").authenticated() //회원별도서목록조회
+                                .requestMatchers("/user/wish").authenticated() //회원별좋아요목록조회
                                 .requestMatchers("/books").authenticated() //도서목록조회
                                 .requestMatchers("/books/{isbn}/wish").authenticated() //도서별좋아요목록조회
-                                .requestMatchers("/user/{id}/loan").authenticated() //회원별도서목록조회
-                                .requestMatchers("/user/{id}/wish").authenticated() //회원별좋아요목록조회
                                 .requestMatchers("/loan").authenticated() //도서대여
-                                .requestMatchers("/loan/{id}").authenticated() //도서반납
+                                .requestMatchers("/loan").authenticated() //도서반납
                                 .requestMatchers("/admin/books").hasRole("ADMIN") //admin도서목록
                                 .anyRequest().authenticated() // 그 외의 요청은 인증 필요
                 )
