@@ -5,7 +5,7 @@ import BookmyBook.bmb.domain.BookStatus;
 import BookmyBook.bmb.response.ApiResponse;
 import BookmyBook.bmb.response.BookResponse;
 import BookmyBook.bmb.response.ExceptionResponse;
-import BookmyBook.bmb.response.dto.BookDto;
+import BookmyBook.bmb.response.dto.BookDetail_DTO;
 import BookmyBook.bmb.response.dto.WishDto;
 import BookmyBook.bmb.security.JwtUtil;
 import BookmyBook.bmb.service.BookService;
@@ -13,10 +13,12 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -117,75 +119,51 @@ public class BookApiController {
         log.info("Request: {}", request);
         log.info("CreatedTime : {}", book.getCreated_at());
         Book insert = bookService.insert(book);
-        BookDto bookDto = new BookDto(book.getIsbn(), book.getId(), book.getTitle(), book.getThumbnail(), book.getAuthor_name(),
+        BookDetail_DTO bookDto = new BookDetail_DTO(book.getIsbn(), book.getId(), book.getTitle(), book.getThumbnail(), book.getAuthor_name(),
                 book.getPublisher_name(), book.getStatus(), book.getDescription(),
                 book.getPublished_date(), book.getCreated_at());
 
         return ResponseEntity.ok(new ApiResponse(200, "도서 추가 성공", bookDto));
     }
 
-    @PostMapping("/books/view") // ID로 도서 한 권 상세 조회
+
+    // 도서 상세 조회
+    @GetMapping("/books/{isbn}")
     @PreAuthorize("hasRole('User') or hasRole('Admin')")
-    public ResponseEntity<?> viewBook(@RequestBody CreateBookRequest request){
-        Long id = request.getId();
-        log.info("/books/view Start : {}", id);
+    public ResponseEntity<?> viewBook(@PathVariable("isbn") String isbn) {
+        log.info(isbn);
+        log.info("/books/??? Start : " + isbn);
+        BookDetail_DTO bookDto = null;
 
-        // 도서 가져오기
-        BookDto bookDto = bookService.view(id);
+        // 도서 존재 확인
+        boolean tf = bookService.bookKakuninn(isbn);
 
-        // 도서가 존재하지 않을 경우 처리
-        if (bookDto == null) {
-            log.info("도서 ID {}에 해당하는 도서를 찾을 수 없습니다.", id);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new ApiResponse(404, "도서를 찾을 수 없습니다.", null));
+        // 확인 후 도서 가져오기
+        if(tf){
+            bookDto = bookService.bookView(isbn);
+        }else {
+            // 도서가 존재하지 않을 경우 처리
+            log.info("도서 ISBN : {}에 해당하는 도서를 찾을 수 없습니다.", isbn);
+            throw new ExceptionResponse(404, "해당 isbn 책 없음", "NOT_FOUNDED_ISBN");
         }
 
-        log.info("/books/view End");
-        log.info("ID : {}", bookDto.getId());
-        log.info("ISBN : {}", bookDto.getIsbn());
-        log.info("Title : {}", bookDto.getTitle());
-        log.info("Author name : {}", bookDto.getAuthor_name());
-        log.info("Publisher name : {}", bookDto.getPublisher_name());
-        log.info("Thumbnail : {}", bookDto.getThumbnail());
-        log.info("Description : {}", bookDto.getDescription());
-        log.info("Published_date : {}", bookDto.getPublished_date());
-        log.info("Created at : {}", bookDto.getCreated_at());
-        log.info("Status : {}", bookDto.getStatus());
-        return ResponseEntity.ok(new ApiResponse(200, "도서 가져오기 성공", bookDto));
-    }
+        log.info("/books/??? End");
 
-    @PostMapping("/books/delete") // ID로 한 권 선택 삭제
-    @PreAuthorize("hasRole('Admin')")
-    public ResponseEntity<?> viewDelete(@RequestBody CreateBookRequest request){
-        Long id = request.getId();
-        log.info("/books/delete Start : {}", id);
-
-        // 도서 가져오기
-        BookDto bookDto = bookService.view(id);
-
-        // 도서가 존재하지 않을 경우 처리
-        if (bookDto == null) {
-            log.info("도서 ID {}에 해당하는 도서를 찾을 수 없습니다.", id);
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new ApiResponse(404, "도서를 찾을 수 없습니다.", null));
+        if (bookDto != null) {
+            log.info("ISBN : {}", bookDto.getIsbn());
+            log.info("Title : {}", bookDto.getTitle());
+            log.info("Author name : {}", bookDto.getAuthor_name());
+            log.info("Publisher name : {}", bookDto.getPublisher_name());
+            log.info("Thumbnail : {}", bookDto.getThumbnail());
+            log.info("Description : {}", bookDto.getDescription());
+            log.info("Published_date : {}", bookDto.getPublished_date());
+            log.info("Created at : {}", bookDto.getCreated_at());
+            log.info("Status : {}", bookDto.getStatus());
         }
 
-        log.info("ID : {}", bookDto.getId());
-        log.info("ISBN : {}", bookDto.getIsbn());
-        log.info("Title : {}", bookDto.getTitle());
-        log.info("Author name : {}", bookDto.getAuthor_name());
-        log.info("Publisher name : {}", bookDto.getPublisher_name());
-        log.info("Thumbnail : {}", bookDto.getThumbnail());
-        log.info("Description : {}", bookDto.getDescription());
-        log.info("Published_date : {}", bookDto.getPublished_date());
-        log.info("Created at : {}", bookDto.getCreated_at());
-        log.info("Status : {}", bookDto.getStatus());
-
-        log.info("Delete Start");
-        bookService.delete(bookDto.getId());
-
-        return ResponseEntity.ok(new ApiResponse(200, "도서 삭제 성공", bookDto));
+        return ResponseEntity.ok(new ApiResponse(200, "도서 상세 조회 성공", bookDto));
     }
+
 
     @Data
     static class CreateBookRequest {

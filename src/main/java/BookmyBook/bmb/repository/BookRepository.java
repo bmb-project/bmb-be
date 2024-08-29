@@ -13,7 +13,7 @@ public interface BookRepository extends JpaRepository<Book, Long>, JpaSpecificat
     Book findByIsbn(String isbn);
     List<Book> findListByIsbn(String isbn);
     List<Book> findByIsbnIn(List<String> isbns);
-    Book findById(long id);
-    List<Book> findByIdIn(List<String> id);
+    //Book findById(long id);
+    //List<Book> findByIdIn(List<String> id);
 
 }

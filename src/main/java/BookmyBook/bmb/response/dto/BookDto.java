@@ -23,12 +23,6 @@ public class BookDto {
     private Long wish_count;
     private boolean wished;
 
-    //선우`s dto
-    private long id;
-    private String description;
-    private LocalDateTime created_at;
-    private LocalDate published_date;
-
     public BookDto(String isbn, String title, String thumbnail, String author_name, String publisher_name, BookStatus status,
                    Long wish_count, boolean wished) {
 
@@ -42,20 +36,6 @@ public class BookDto {
         this.wished = wished;
     }
 
-    // 선우`s 생성자 - 도서 추가
-    public BookDto(String isbn, long id, String title, String thumbnail, String author_name,
-                   String publisher_name, BookStatus status, String description,
-                   LocalDate published_date, LocalDateTime created_at) {
-        this.isbn = isbn;
-        this.id = id;
-        this.title = title;
-        this.thumbnail = thumbnail;
-        this.author_name = author_name;
-        this.publisher_name = publisher_name;
-        this.status = status;
-        this.description = description;
-        this.published_date = published_date;
-        this.created_at = created_at;
-    }
+
 
 }

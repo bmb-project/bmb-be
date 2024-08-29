@@ -8,6 +8,7 @@ import BookmyBook.bmb.repository.WishRepository;
 import BookmyBook.bmb.response.BookResponse;
 import BookmyBook.bmb.response.ExceptionResponse;
 import BookmyBook.bmb.response.dto.BookDto;
+import BookmyBook.bmb.response.dto.BookDetail_DTO;
 import BookmyBook.bmb.response.dto.WishDto;
 import BookmyBook.bmb.security.JwtUtil;
 import lombok.RequiredArgsConstructor;
@@ -183,22 +184,43 @@ public class BookService {
     }
 
     //도서 한 권 상세정보
-    public BookDto view(long id){
-        // 도서를 ID로 조회하고 Optional<Book>로 받음
-        Book book = bookRepository.findById(id);
-        BookDto dto = new BookDto(book.getIsbn(), book.getId(), book.getTitle(), book.getThumbnail(), book.getAuthor_name(),
+    public BookDetail_DTO bookView(String isbn){
+
+        Book book = bookRepository.findByIsbn(isbn);
+        if(book == null){
+            throw new ExceptionResponse(404, "해당 도서 없음", "NOT_FOUND_BOOK");
+        }
+
+        BookDetail_DTO dto = new BookDetail_DTO(book.getIsbn(), book.getId(), book.getTitle(), book.getThumbnail(), book.getAuthor_name(),
                 book.getPublisher_name(), book.getStatus(), book.getDescription(),
                 book.getPublished_date(), book.getCreated_at());
         // Optional의 값이 존재하는 경우 DTO로 변환, 없으면 null 반환
         return dto;
     }
 
-    //도서 삭제
-    @Transactional
-    public void delete(long id){
-        Book book = bookRepository.findById(id);
-        bookRepository.deleteById(id);
-        log.info("삭제 완료.");
+    // 도서 존재 확인
+    public boolean bookKakuninn(String isbn){
+        log.info("bookKakuninn Start! : " + isbn);
+        Book book = bookRepository.findByIsbn(isbn);
+        if(book == null){
+            throw new ExceptionResponse(404, "해당 도서 없음", "NOT_FOUND_BOOK");
+        }
+        if(book.getId() != null){
+            log.info("해당 도서가 존재합니다.");
+            return true;
+        }else {
+            log.info("해당 도서가 존재하지 않습니다.");
+            return false;
+        }
     }
+
+    // ID로 도서 가져오기 dto
+//    public SeonwooBook_DTO bookBringId(long id){
+//        Optional<Book> book = bookRepository.findById(id);
+//        SeonwooBook_DTO dto = new SeonwooBook_DTO(book.get().getIsbn(), book.get().getId(), book.get().getTitle(), book.get().getThumbnail(),
+//                book.get().getAuthor_name(), book.get().getPublisher_name(), book.get().getStatus(), book.get().getDescription(),
+//                book.get().getPublished_date(), book.get().getCreated_at());
+//        return dto;
+//    }
 
 }
