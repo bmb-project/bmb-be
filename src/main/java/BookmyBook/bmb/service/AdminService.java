@@ -7,10 +7,13 @@ import BookmyBook.bmb.repository.BookRepository;
 import BookmyBook.bmb.repository.LoanRepository;
 import BookmyBook.bmb.repository.WishRepository;
 import BookmyBook.bmb.response.AdminBookResponse;
+import BookmyBook.bmb.response.ExceptionResponse;
 import BookmyBook.bmb.response.dto.AdminBookDto;
 import BookmyBook.bmb.response.dto.AdminLoanDto;
+import BookmyBook.bmb.response.dto.BookDetail_DTO;
 import BookmyBook.bmb.security.JwtUtil;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -20,11 +23,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
+@Slf4j
 public class AdminService {
 
     private final BookRepository bookRepository;
@@ -107,4 +112,38 @@ public class AdminService {
 
         return response;
     }
+
+    //도서 추가
+    @Transactional
+    public Book insert(Book book) {
+        log.info("adminService - insert Start & End");
+        return bookRepository.save(book);
+    }
+
+    //도서 삭제
+    @Transactional
+    public void delete(long id){
+        log.info("qwer");
+        Optional<Book> book = bookRepository.findById(id);
+        log.info("asdf");
+        if(book.isEmpty()){
+            throw new ExceptionResponse(404, "해당 도서 없음", "NOT_FOUND_BOOK");
+        }
+        bookRepository.deleteById(id);
+        log.info("삭제 완료.");
+    }
+
+    //도서 겟또
+    public BookDetail_DTO bring(String isbn){
+        Book book = bookRepository.findByIsbn(isbn);
+        if(book == null){
+            throw new ExceptionResponse(404, "해당 도서 없음", "NOT_FOUND_BOOK");
+        }
+        BookDetail_DTO dto = new BookDetail_DTO(book.getIsbn(), book.getId(), book.getTitle(), book.getThumbnail(),
+                book.getAuthor_name(), book.getPublisher_name(), book.getStatus(), book.getDescription(),
+                book.getPublished_date(), book.getCreated_at());
+        log.info("겟또 완료.");
+        return dto;
+    }
+
 }
