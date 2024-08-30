@@ -1,6 +1,7 @@
 package BookmyBook.bmb.security;
 
 import BookmyBook.bmb.domain.UserRole;
+import BookmyBook.bmb.response.ExceptionResponse;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
@@ -35,38 +36,34 @@ public class JwtFilter extends OncePerRequestFilter {
             return;
         }
 
-        // 쿠키에서 토큰 추출
-        String accessToken = jwtUtil.getTokenFromCookies(request.getCookies(), "accessToken");
+        //Authorization header에서 token 추출
+        String authHeader = request.getHeader("Authorization");
+        if(authHeader == null || !authHeader.startsWith("Bearer")){
+            throw new ExceptionResponse(401, "존재하지 않는 TOKEN", "INVALID_TOKEN");
+        }
+        String accessToken = authHeader.substring(7); //Bearer 제거
 
-        if (accessToken != null) {
-            try {
-                String user_id = jwtUtil.getUserId(accessToken, "access");
-                String roleString = jwtUtil.getRole(accessToken);
-                UserRole role = UserRole.valueOf(roleString);
+        try {
+            String user_id = jwtUtil.getUserId(accessToken, "access");
+            String roleString = jwtUtil.getRole(accessToken);
+            UserRole role = UserRole.valueOf(roleString);
 
-                if (user_id != null && jwtUtil.validateToken(accessToken, user_id, "access")) {
-                    //역할에 따른 권한 설정
-                    Collection<? extends GrantedAuthority> authorities = getAuthorities(role);
+            if (user_id != null && jwtUtil.validateToken(accessToken, user_id, "access")) {
+                //역할에 따른 권한 설정
+                Collection<? extends GrantedAuthority> authorities = getAuthorities(role);
 
-                    //사용자 아이디으로 인증 객체 생성
-                    Authentication authentication = new UsernamePasswordAuthenticationToken(
-                            user_id, null, authorities
-                    );
-                    SecurityContextHolder.getContext().setAuthentication(authentication);
-                } else {
-                    // 유효하지 않은 토큰인 경우
-                    setErrorResponse(response, HttpServletResponse.SC_FORBIDDEN, "INVALID_TOKEN", "존재하지 않는 token");
-                    return;
-                }
-            } catch (Exception e){
-                // 예외를 로그로 기록하고 403 오류를 반환합니다
-                System.out.println(e.getMessage());
-                setErrorResponse(response, HttpServletResponse.SC_FORBIDDEN, "AUTHENTICATION_ERROR", "권한 없음");
+                //사용자 아이디으로 인증 객체 생성
+                Authentication authentication = new UsernamePasswordAuthenticationToken(
+                        user_id, null, authorities
+                );
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+            } else {
+                // 유효하지 않은 토큰인 경우
+                setErrorResponse(response, "INVALID_TOKEN", "존재하지 않는 token");
                 return;
             }
-        }else {
-            // 액세스 토큰이 없을 경우 처리
-            setErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED, "NO_TOKEN", "token 없음");
+        } catch (Exception e) {
+            setErrorResponse(response, "AUTHENTICATION_ERROR", "권한 없음");
             return;
         }
         filterChain.doFilter(request, response); // 필터 체인을 계속 진행
@@ -90,13 +87,13 @@ public class JwtFilter extends OncePerRequestFilter {
         return Collections.emptyList();
     }
 
-    private void setErrorResponse(HttpServletResponse response, int statusCode, String code, String message) throws IOException {
-        response.setStatus(statusCode);
+    private void setErrorResponse(HttpServletResponse response, String code, String message) throws IOException {
+        response.setStatus(HttpServletResponse.SC_FORBIDDEN);
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
 
         PrintWriter writer = response.getWriter();
-        writer.write("{\"status\":\""+statusCode+"\"\n\t\"error\": \"" + code + "\"\n\t\"message\":\""+message+"\"}");
+        writer.write("{\"status\":\""+ HttpServletResponse.SC_FORBIDDEN +"\"\n\t\"error\": \"" + code + "\"\n\t\"message\":\""+message+"\"}");
         writer.flush();
     }
 }

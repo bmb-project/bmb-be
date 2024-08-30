@@ -14,6 +14,7 @@ import BookmyBook.bmb.repository.WishRepository;
 import BookmyBook.bmb.response.ExceptionResponse;
 import BookmyBook.bmb.response.UserLoanResponse;
 import BookmyBook.bmb.response.UserWishResponse;
+import BookmyBook.bmb.response.dto.UserDto;
 import BookmyBook.bmb.response.dto.UserLoanDto;
 import BookmyBook.bmb.response.dto.UserWishDto;
 import BookmyBook.bmb.security.JwtUtil;
@@ -276,5 +277,12 @@ public class UserService {
         if(userId.isEmpty()) throw new ExceptionResponse(404, "회원 조회 실패", "FAIL_TO_LOAD");
 
         return UserId.getFirst().getRole();
+    }
+
+    //회원정보조회
+    public UserDto getUserInfo(String userId){
+        List<User> users = userRepository.findByUserID(userId);
+
+        return new UserDto(userId, users.getFirst().getNickname(), users.getFirst().getRole());
     }
 }

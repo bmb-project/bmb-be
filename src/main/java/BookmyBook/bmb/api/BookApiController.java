@@ -42,8 +42,12 @@ public class BookApiController {
             @RequestParam(value = "category", required = false) String category,
             @RequestParam(value = "keyword", required = false) String keyword) {
 
-        //Cookie에서 Access Token 추출
-        String accessToken = jwtUtil.getTokenFromCookies(request.getCookies(), "accessToken");
+        //Authorization header에서 token 추출
+        String authHeader = request.getHeader("Authorization");
+        if(authHeader == null || !authHeader.startsWith("Bearer")){
+            throw new ExceptionResponse(401, "존재하지 않는 TOKEN", "INVALID_TOKEN");
+        }
+        String accessToken = authHeader.substring(7); //Bearer 제거
 
         BookResponse bookResponse;
         try {
@@ -65,8 +69,12 @@ public class BookApiController {
     @PreAuthorize("hasRole('User') or hasRole('Admin')")
     public ResponseEntity<?> getUserWish(@PathVariable("isbn") String isbn, HttpServletRequest request){
 
-        //Cookie에서 Access Token 추출
-        String accessToken = jwtUtil.getTokenFromCookies(request.getCookies(), "accessToken");
+        //Authorization header에서 token 추출
+        String authHeader = request.getHeader("Authorization");
+        if(authHeader == null || !authHeader.startsWith("Bearer")){
+            throw new ExceptionResponse(401, "존재하지 않는 TOKEN", "INVALID_TOKEN");
+        }
+        String accessToken = authHeader.substring(7); //Bearer 제거
 
         //도서 목록 조회
         WishDto wishDto = bookService.getBookWish(accessToken, isbn);
@@ -79,8 +87,12 @@ public class BookApiController {
     @PreAuthorize("hasRole('User') or hasRole('Admin')")
     public ResponseEntity<?> booksWish(@PathVariable("isbn") String isbn, HttpServletRequest request){
 
-        //Cookie에서 Access Token 추출
-        String accessToken = jwtUtil.getTokenFromCookies(request.getCookies(), "accessToken");
+        //Authorization header에서 token 추출
+        String authHeader = request.getHeader("Authorization");
+        if(authHeader == null || !authHeader.startsWith("Bearer")){
+            throw new ExceptionResponse(401, "존재하지 않는 TOKEN", "INVALID_TOKEN");
+        }
+        String accessToken = authHeader.substring(7); //Bearer 제거
 
         //좋아요 등록
         WishDto wishDto = bookService.saveWish(isbn, accessToken);
@@ -92,8 +104,12 @@ public class BookApiController {
     @PreAuthorize("hasRole('User') or hasRole('Admin')")
     public ResponseEntity<?> deleteWish(@PathVariable("isbn") String isbn, HttpServletRequest request){
 
-        //Cookie에서 Access Token 추출
-        String accessToken = jwtUtil.getTokenFromCookies(request.getCookies(), "accessToken");
+        //Authorization header에서 token 추출
+        String authHeader = request.getHeader("Authorization");
+        if(authHeader == null || !authHeader.startsWith("Bearer")){
+            throw new ExceptionResponse(401, "존재하지 않는 TOKEN", "INVALID_TOKEN");
+        }
+        String accessToken = authHeader.substring(7); //Bearer 제거
 
         //좋아요 취소
         WishDto wishDto = bookService.deleteWish(isbn, accessToken);
