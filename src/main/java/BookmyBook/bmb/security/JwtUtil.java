@@ -6,7 +6,6 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import jakarta.servlet.http.Cookie;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -53,18 +52,6 @@ public class JwtUtil {
                 .compact();
     }
 
-    //Cookie에서 token 추출
-    public String getTokenFromCookies(Cookie[] cookies, String cookieName) {
-        if (cookies == null) return null;
-
-        for (Cookie cookie : cookies) {
-            if (cookieName.equals(cookie.getName())) {
-                return cookie.getValue();
-            }
-        }
-        return null;
-    }
-
     //JWT에서 claim 추출
     public Claims extractClaims(String token, String secretKey){
         try {
@@ -81,12 +68,7 @@ public class JwtUtil {
     //user_id 추출
     public String getUserId(String token, String tokenType){
         String secretKey = getSecretKeyForTokenType(tokenType);
-        Claims claims;
-        try {
-            claims = extractClaims(token, secretKey);
-        }catch (Exception e){
-            throw new ExceptionResponse(400, "token 추출 실패", "TOKEN_EXTRACTION_FAILED");
-        }
+        Claims claims= extractClaims(token, secretKey);
 
         if(claims == null || claims.getSubject() == null){
             throw new ExceptionResponse(401, "유효하지 않은 access token", "INVALID_ACCESS_TOKEN");
@@ -97,12 +79,7 @@ public class JwtUtil {
 
     //role 추출
     public String  getRole(String token){
-        Claims claims;
-        try{
-            claims = extractClaims(token, accessSecretKey);
-        } catch (Exception e){
-            throw new ExceptionResponse(400, "token 추출 실패", "TOKEN_EXTRACTION_FAILED");
-        }
+        Claims claims = extractClaims(token, accessSecretKey);
 
         if(claims == null || claims.getSubject() == null){
             throw new ExceptionResponse(401, "유효하지 않은 access token", "INVALID_ACCESS_TOKEN");
@@ -121,13 +98,12 @@ public class JwtUtil {
         return claims == null || claims.getExpiration().before(new Date());
     }
 
-
     // Token 타입에 따른 Secret Key 선택
     private String getSecretKeyForTokenType(String tokenType) {
         return switch (tokenType) {
             case "access" -> accessSecretKey;
             case "refresh" -> refreshSecretKey;
-            default -> throw new ExceptionResponse(404, "존재하지 않는 token type", "UNDEFINED_TOKEN_TYPE");
+            default -> throw new IllegalStateException();
         };
     }
 }

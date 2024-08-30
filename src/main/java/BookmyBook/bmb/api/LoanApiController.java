@@ -2,6 +2,7 @@ package BookmyBook.bmb.api;
 
 import BookmyBook.bmb.domain.Loan;
 import BookmyBook.bmb.response.ApiResponse;
+import BookmyBook.bmb.response.ExceptionResponse;
 import BookmyBook.bmb.response.dto.LoanDto;
 import BookmyBook.bmb.security.JwtUtil;
 import BookmyBook.bmb.service.LoanService;
@@ -25,8 +26,12 @@ public class LoanApiController {
     @PreAuthorize("hasRole('User') or hasRole('Admin')")
     public ResponseEntity<?> loanBook(@RequestBody Map<String, String> request, HttpServletRequest httpRequest){
 
-        //Cookie에서 Access Token 추출
-        String accessToken = jwtUtil.getTokenFromCookies(httpRequest.getCookies(), "accessToken");
+        //Authorization header에서 token 추출
+        String authHeader = httpRequest.getHeader("Authorization");
+        if(authHeader == null || !authHeader.startsWith("Bearer")){
+            throw new ExceptionResponse(401, "존재하지 않는 TOKEN", "INVALID_TOKEN");
+        }
+        String accessToken = authHeader.substring(7); //Bearer 제거
         String book_isbn = request.get("book_isbn");
 
         Loan loan = loanService.loanBook(book_isbn, accessToken);
@@ -40,8 +45,12 @@ public class LoanApiController {
     @PreAuthorize("hasRole('User') or hasRole('Admin')")
     public ResponseEntity<?> returnBook(@RequestBody Map<String, String> request, HttpServletRequest httpRequest){
 
-        //Cookie에서 Access Token 추출
-        String accessToken = jwtUtil.getTokenFromCookies(httpRequest.getCookies(), "accessToken");
+        //Authorization header에서 token 추출
+        String authHeader = httpRequest.getHeader("Authorization");
+        if(authHeader == null || !authHeader.startsWith("Bearer")){
+            throw new ExceptionResponse(401, "존재하지 않는 TOKEN", "INVALID_TOKEN");
+        }
+        String accessToken = authHeader.substring(7); //Bearer 제거
         String book_isbn = request.get("book_isbn");
 
 

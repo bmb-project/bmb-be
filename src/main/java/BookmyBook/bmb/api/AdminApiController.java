@@ -38,8 +38,12 @@ public class AdminApiController {
             @RequestParam(value = "keyword", required = false) String keyword,
             HttpServletRequest request){
 
-        //Cookie에서 Access Token 추출
-        String accessToken = jwtUtil.getTokenFromCookies(request.getCookies(), "accessToken");
+        //Authorization header에서 token 추출
+        String authHeader = request.getHeader("Authorization");
+        if(authHeader == null || !authHeader.startsWith("Bearer")){
+            throw new ExceptionResponse(401, "존재하지 않는 TOKEN", "INVALID_TOKEN");
+        }
+        String accessToken = authHeader.substring(7); //Bearer 제거
 
         AdminBookResponse adminBookResponse;
         try {
