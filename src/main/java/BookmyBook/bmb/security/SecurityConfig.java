@@ -46,6 +46,7 @@ public class SecurityConfig {
                                 .requestMatchers("/books/{isbn}/wish").authenticated() //도서별좋아요목록조회, 도서좋아요하기, 도서좋아요취소
                                 .requestMatchers("/loan").authenticated() //도서대여, 도서반납
                                 .requestMatchers("/admin/books").hasRole("ADMIN") //admin도서목록
+                                .requestMatchers("/auth").permitAll() //RTR
                                 .anyRequest().authenticated() // 그 외의 요청은 인증 필요
                 )
                 .addFilterBefore(new JwtFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class)

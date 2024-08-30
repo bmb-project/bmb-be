@@ -78,7 +78,7 @@ public class UserApiController {
         response.addCookie(refreshTokenCookie);
 
         // 데이터베이스에 Refresh Token 저장
-        refreshTokenService.saveRefreshToken(user.getUser_id(), refreshToken, LocalDateTime.now());
+        refreshTokenService.saveRefreshToken(user.getUser_id(), refreshToken, LocalDateTime.now().plusDays(7));
 
         return ResponseEntity.ok(new TokenResponse(200, "로그인 성공", accessToken, userDto));
     }
