@@ -38,7 +38,7 @@ public class AuthController {
                                            HttpServletResponse response) {
         Optional<RefreshToken> storedRefreshToken = refreshTokenService.getRefreshToken(refreshToken);
 
-        if (storedRefreshToken.isPresent()) {
+        if (storedRefreshToken.isPresent() && storedRefreshToken.get().getExpiryDate().isAfter(LocalDateTime.now())) {
             String userId = storedRefreshToken.get().getUserId();
             UserRole role = userService.getRoleById(userId);
 
@@ -51,7 +51,7 @@ public class AuthController {
             refreshTokenService.deleteRefreshToken(refreshToken);
 
             // 새로운 Refresh Token 저장
-            refreshTokenService.saveRefreshToken(userId, newRefreshToken, LocalDateTime.now());
+            refreshTokenService.saveRefreshToken(userId, newRefreshToken, LocalDateTime.now().plusDays(7));
 
             // 쿠키로 새로운 Refresh Token 설정
             Cookie refreshTokenCookie = new Cookie("refreshToken", newRefreshToken);

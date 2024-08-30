@@ -71,7 +71,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
     private boolean isPublicEndpoint(String requestUri) {
         // 공개된 엔드포인트를 정의
-        return requestUri.startsWith("/user/signin") || requestUri.startsWith("/user/signup");
+        return requestUri.startsWith("/user/signin") || requestUri.startsWith("/user/signup") || requestUri.startsWith("/auth");
     }
 
     public Collection<? extends GrantedAuthority> getAuthorities(UserRole role){
