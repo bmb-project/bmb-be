@@ -1,0 +1,14 @@
+spring:
+  datasource:
+    url: jdbc:mariadb://${TODO_MARIADB_HOST}:${TODO_MARIADB_PORT}/${TODO_DATA_BASE_NAME}?useSSL=false
+    username: ${TODO_MARIADB_USER_NAME}
+    password: ${TODO_MARIADB_PASSWORD}
+    driver-class-name: org.mariadb.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.MariaDB103Dialect

@@ -5,7 +5,7 @@ import org.springframework.data.jpa.domain.Specification;
 public class BookSpecification {
 
     public static Specification<Book> byCategoryAndKeyword(String category, String keyword){
-        return (root, _, criteriaBuilder) -> {
+        return (root, query, criteriaBuilder) -> {
             if(keyword == null || category == null){
                 return criteriaBuilder.conjunction(); //조건이 없으면 모든 결과를 반환
             }
