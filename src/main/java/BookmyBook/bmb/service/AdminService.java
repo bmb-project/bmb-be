@@ -23,7 +23,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -102,10 +101,10 @@ public class AdminService {
 
         // 응답 객체 생성
         AdminBookResponse response = new AdminBookResponse();
-        response.setTotalPages(bookPage.getTotalPages());
-        response.setCurrentPage(pageable.getPageNumber() + 1);
-        response.setPageSize(pageable.getPageSize());
-        response.setTotalItems(bookPage.getTotalElements());
+        response.setTotal_pages(bookPage.getTotalPages());
+        response.setCurrent_page(pageable.getPageNumber() + 1);
+        response.setPage_size(pageable.getPageSize());
+        response.setTotal_items(bookPage.getTotalElements());
         response.setCategory(category);
         response.setKeyword(keyword);
         response.setBooks(bookDtos);
