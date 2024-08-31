@@ -135,9 +135,9 @@ public class BookApiController {
         log.info("Request: {}", request);
         log.info("CreatedTime : {}", book.getCreated_at());
         Book insert = bookService.insert(book);
-        BookDetail_DTO bookDto = new BookDetail_DTO(book.getIsbn(), book.getId(), book.getTitle(), book.getThumbnail(), book.getAuthor_name(),
-                book.getPublisher_name(), book.getStatus(), book.getDescription(),
-                book.getPublished_date(), book.getCreated_at());
+        BookDetail_DTO bookDto = new BookDetail_DTO(book.getId(), book.getIsbn(), book.getTitle(),
+                book.getDescription(), book.getThumbnail(), book.getAuthor_name(),
+                book.getPublisher_name(), book.getPublished_date(), book.getCreated_at(), book.getStatus());
 
         return ResponseEntity.ok(new ApiResponse(200, "도서 추가 성공", bookDto));
     }
@@ -157,7 +157,7 @@ public class BookApiController {
         // 확인 후 도서 가져오기
         if(tf){
             bookDto = bookService.bookView(isbn);
-        }else {
+        }else{
             // 도서가 존재하지 않을 경우 처리
             log.info("도서 ISBN : {}에 해당하는 도서를 찾을 수 없습니다.", isbn);
             throw new ExceptionResponse(404, "해당 isbn 책 없음", "NOT_FOUNDED_ISBN");
@@ -166,7 +166,7 @@ public class BookApiController {
         log.info("/books/??? End");
 
         if (bookDto != null) {
-            log.info("ISBN : {}", bookDto.getIsbn());
+            log.info("아래는 출력된 결과물입니다.");
             log.info("Title : {}", bookDto.getTitle());
             log.info("Author name : {}", bookDto.getAuthor_name());
             log.info("Publisher name : {}", bookDto.getPublisher_name());
@@ -175,6 +175,7 @@ public class BookApiController {
             log.info("Published_date : {}", bookDto.getPublished_date());
             log.info("Created at : {}", bookDto.getCreated_at());
             log.info("Status : {}", bookDto.getStatus());
+            log.info("출력된 결과물은 이상입니다.");
         }
 
         return ResponseEntity.ok(new ApiResponse(200, "도서 상세 조회 성공", bookDto));

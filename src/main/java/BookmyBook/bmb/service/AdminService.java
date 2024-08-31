@@ -115,21 +115,31 @@ public class AdminService {
 
     //도서 추가
     @Transactional
-    public Book insert(Book book) {
+    public boolean insert(Book book) {
         log.info("adminService - insert Start & End");
-        return bookRepository.save(book);
+        String isbn = book.getIsbn();
+
+        Book b2 = bookRepository.save(book);
+        if(b2.getId() == null){
+            log.info("도서 등록 실패");
+            return false;
+        }else{
+            log.info("도서 등록 성공");
+            return true;
+        }
+
     }
 
     //도서 삭제
     @Transactional
-    public void delete(long id){
+    public void delete(String isbn){
         log.info("qwer");
-        Optional<Book> book = bookRepository.findById(id);
+        Book book = bookRepository.findByIsbn(isbn);
         log.info("asdf");
-        if(book.isEmpty()){
+        if(book == null){
             throw new ExceptionResponse(404, "해당 도서 없음", "NOT_FOUND_BOOK");
         }
-        bookRepository.deleteById(id);
+        bookRepository.deleteByIsbn(isbn);
         log.info("삭제 완료.");
     }
 
@@ -139,11 +149,19 @@ public class AdminService {
         if(book == null){
             throw new ExceptionResponse(404, "해당 도서 없음", "NOT_FOUND_BOOK");
         }
-        BookDetail_DTO dto = new BookDetail_DTO(book.getIsbn(), book.getId(), book.getTitle(), book.getThumbnail(),
-                book.getAuthor_name(), book.getPublisher_name(), book.getStatus(), book.getDescription(),
-                book.getPublished_date(), book.getCreated_at());
+        BookDetail_DTO dto = new BookDetail_DTO(book.getId(), book.getIsbn(), book.getTitle(),
+                book.getDescription(), book.getThumbnail(), book.getAuthor_name(),
+                book.getPublisher_name(), book.getPublished_date(), book.getCreated_at(), book.getStatus());
         log.info("겟또 완료.");
         return dto;
+    }
+
+    // 도서 존재 확인
+    public void youHere(String isbn){
+        Book book = bookRepository.findByIsbn(isbn);
+        if(book != null){
+            throw new ExceptionResponse(404, "해당 도서가 이미 존재함", "ALREADY_EXIST_BOOK_ADMIN");
+        }
     }
 
 }

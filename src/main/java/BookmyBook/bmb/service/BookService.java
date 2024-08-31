@@ -191,9 +191,9 @@ public class BookService {
             throw new ExceptionResponse(404, "해당 도서 없음", "NOT_FOUND_BOOK");
         }
 
-        BookDetail_DTO dto = new BookDetail_DTO(book.getIsbn(), book.getId(), book.getTitle(), book.getThumbnail(), book.getAuthor_name(),
-                book.getPublisher_name(), book.getStatus(), book.getDescription(),
-                book.getPublished_date(), book.getCreated_at());
+        BookDetail_DTO dto = new BookDetail_DTO(book.getTitle(),
+                book.getDescription(), book.getThumbnail(), book.getAuthor_name(),
+                book.getPublisher_name(), book.getPublished_date(), book.getCreated_at(), book.getStatus());
         // Optional의 값이 존재하는 경우 DTO로 변환, 없으면 null 반환
         return dto;
     }
@@ -202,13 +202,18 @@ public class BookService {
     public boolean bookKakuninn(String isbn){
         log.info("bookKakuninn Start! : " + isbn);
         Book book = bookRepository.findByIsbn(isbn);
-        if(book == null){
+
+        // 13자리가 아니면 컷
+        if(isbn.length() != 13){
+            throw new ExceptionResponse(404, "잘못된 ISBN", "INVALID_ISBN");
+        }else if(book == null){
             throw new ExceptionResponse(404, "해당 도서 없음", "NOT_FOUND_BOOK");
         }
+        log.info("findByIsbn부터 isbn 확인 과정까지 이상 무.");
         if(book.getId() != null){
             log.info("해당 도서가 존재합니다.");
             return true;
-        }else {
+        }else{
             log.info("해당 도서가 존재하지 않습니다.");
             return false;
         }
