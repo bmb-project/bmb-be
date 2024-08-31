@@ -63,6 +63,12 @@ public class AdminApiController {
     @PostMapping("admin/books") // 도서 추가
     @PreAuthorize("hasRole('Admin')")
     public ResponseEntity<?> insertBook(@RequestBody CreateBookRequest request){
+
+        if(request.isbn.length() != 13) {
+            throw new ExceptionResponse(400, "잘못된 ISBN", "INVALID_ISBN_ADMIN");
+        }
+        adminService.youHere(request.isbn);
+
         try {
             Book book = new Book();
             book.setIsbn(request.isbn);
@@ -78,19 +84,23 @@ public class AdminApiController {
             if(request.available){
                 book.setStatus(BookStatus.AVAILABLE);
             }else {
-                throw new ExceptionResponse(400, "도서 등록 실패", "UNDEFIND");
+                throw new ExceptionResponse(401, "available의 값이 true가 아닙니다.", "AVAILABLE_IS_NOT_TRUE");
             }
 
-            log.info("Request: {}", request);
-            log.info("CreatedTime : {}", book.getCreated_at());
-            Book insert = adminService.insert(book);
-            BookDetail_DTO bookDto = new BookDetail_DTO(book.getIsbn(), book.getId(), book.getTitle(), book.getThumbnail(), book.getAuthor_name(),
-                    book.getPublisher_name(), book.getStatus(), book.getDescription(),
-                    book.getPublished_date(), book.getCreated_at());
+            boolean insert = adminService.insert(book);
 
-            return ResponseEntity.ok(new ApiResponse(200, "도서 추가 성공", bookDto));
+            if(insert){
+                BookDetail_DTO bookDto = new BookDetail_DTO(book.getIsbn(), book.getTitle(),
+                        book.getDescription(), book.getThumbnail(), book.getAuthor_name(),
+                        book.getPublisher_name(), book.getPublished_date(), book.getCreated_at(), book.getStatus());
+
+                return ResponseEntity.ok(new ApiResponse(201, "도서 등록 성공", bookDto));
+            }else {
+                return ResponseEntity.ok(new ApiResponse(404, "도서 등록 실패", ""));
+            }
+
         }catch (Exception e){
-            throw new ExceptionResponse(409, "도서 추가 실패 - ISBN 중복", "ALREADY_INSERT_BOOK_ADMIN");
+            throw new ExceptionResponse(410, "처리 과정 중 예외 발생", "EXCEPTION_ADMIN");
         }
 
 
@@ -99,8 +109,10 @@ public class AdminApiController {
     @DeleteMapping("/books") // ID로 한 권 선택 삭제
     @PreAuthorize("hasRole('Admin')")
     public ResponseEntity<?> viewDelete(@RequestBody CreateBookRequest request){
-        log.info("qwer");
         String isbn = request.getIsbn();
+        if(isbn.length() != 13){
+            throw new ExceptionResponse(400, "잘못된 ISBN", "INVALID_ISBN_ADMIN");
+        }
         log.info("/books Start : {}", isbn);
 
         // 도서 가져오기
@@ -110,6 +122,9 @@ public class AdminApiController {
         if (bookDto == null) {
             log.info("도서 ID {}에 해당하는 도서를 찾을 수 없습니다.", isbn);
             throw new ExceptionResponse(404, "도서 목록 및 정보 조회 실패", "FAIL_TO_LOAD_ADMIN");
+        }else if(bookDto.getStatus() != BookStatus.AVAILABLE){
+            log.info("선택한 도서는 대여 중인 도서이므로 삭제할 수 없습니다.");
+            throw new ExceptionResponse(500, "도서 삭제 실패 - 대여 중인 도서 삭제 시도", "NOT_EXIST_BOOK_ADMIN");
         }
 
         log.info("ID : {}", bookDto.getId());
@@ -124,9 +139,9 @@ public class AdminApiController {
         log.info("Status : {}", bookDto.getStatus());
 
         log.info("Delete Start");
-        adminService.delete(bookDto.getId());
-
-        return ResponseEntity.ok(new ApiResponse(200, "도서 삭제 성공", bookDto));
+        adminService.delete(bookDto.getIsbn());
+        log.info("Delete Over");
+        return ResponseEntity.ok(new ApiResponse(200, "도서 삭제 성공"));
     }
 
     @Data

@@ -1,6 +1,7 @@
 package BookmyBook.bmb.response.dto;
 
 import BookmyBook.bmb.domain.BookStatus;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -11,31 +12,68 @@ import java.time.LocalDateTime;
 @Setter
 public class BookDetail_DTO {
 
-    private String isbn;
     private long id;
+    private String isbn;
     private String title;
+    private String description;
+    private String thumbnail;
     private String author_name;
     private String publisher_name;
-    private String thumbnail;
-    private BookStatus status;
-    private String description;
-    private LocalDateTime created_at;
     private LocalDate published_date;
 
-    // 선우`s 생성자 - 도서 추가
-    public BookDetail_DTO(String isbn, long id, String title, String thumbnail, String author_name,
-                          String publisher_name, BookStatus status, String description,
-                          LocalDate published_date, LocalDateTime created_at) {
-        this.isbn = isbn;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Asia/Seoul")
+    private LocalDateTime created_at;
+
+    private BookStatus status;
+
+
+
+    // 기본 생성자
+    public BookDetail_DTO(long id, String isbn, String title, String description, String thumbnail,
+                          String author_name, String publisher_name, LocalDate published_date,
+                          LocalDateTime created_at, BookStatus status) {
+
         this.id = id;
+        this.isbn = isbn;
         this.title = title;
+        this.description = description;
         this.thumbnail = thumbnail;
         this.author_name = author_name;
         this.publisher_name = publisher_name;
-        this.status = status;
-        this.description = description;
         this.published_date = published_date;
         this.created_at = created_at;
+        this.status = status;
+    }
+
+    // 도서 추가
+    public BookDetail_DTO(String isbn, String title, String description, String thumbnail,
+                          String author_name, String publisher_name, LocalDate published_date,
+                          LocalDateTime created_at, BookStatus status) {
+
+        this.isbn = isbn;
+        this.title = title;
+        this.description = description;
+        this.thumbnail = thumbnail;
+        this.author_name = author_name;
+        this.publisher_name = publisher_name;
+        this.published_date = published_date;
+        this.created_at = created_at;
+        this.status = status;
+    }
+
+    // 도서 상세보기
+    public BookDetail_DTO(String title, String description, String thumbnail,
+                          String author_name, String publisher_name, LocalDate published_date,
+                          LocalDateTime created_at, BookStatus status) {
+
+        this.title = title;
+        this.description = description;
+        this.thumbnail = thumbnail;
+        this.author_name = author_name;
+        this.publisher_name = publisher_name;
+        this.published_date = published_date;
+        this.created_at = created_at;
+        this.status = status;
     }
 
 }

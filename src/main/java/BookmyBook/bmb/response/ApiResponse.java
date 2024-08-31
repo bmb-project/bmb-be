@@ -16,4 +16,9 @@ public class ApiResponse {
         this.message = message;
         this.result = result;
     }
+
+    public ApiResponse(int ststusCode, String message) {
+        this.ststusCode = ststusCode;
+        this.message = message;
+    }
 }
