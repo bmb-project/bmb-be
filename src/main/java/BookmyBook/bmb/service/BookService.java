@@ -83,10 +83,10 @@ public class BookService {
 
         // 응답 객체 생성
         BookResponse response = new BookResponse();
-        response.setTotalPages(bookPage.getTotalPages());
-        response.setCurrentPage(pageable.getPageNumber() + 1);
-        response.setPageSize(pageable.getPageSize());
-        response.setTotalItems(bookPage.getTotalElements());
+        response.setTotal_pages(bookPage.getTotalPages());
+        response.setCurrent_page(pageable.getPageNumber() + 1);
+        response.setPage_size(pageable.getPageSize());
+        response.setTotal_items(bookPage.getTotalElements());
         response.setCategory(category);
         response.setKeyword(keyword);
         response.setBooks(bookDtos);

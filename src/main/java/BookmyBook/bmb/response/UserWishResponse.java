@@ -9,10 +9,10 @@ import java.util.List;
 @Getter @Setter
 public class UserWishResponse {
 
-    private int totalPages;
-    private int currentPage;
-    private int pageSize;
-    private long totalItems;
+    private int total_pages;
+    private int current_page;
+    private int page_size;
+    private long total_items;
     private String category;
     private String keyword;
     private List<UserWishDto> books;
