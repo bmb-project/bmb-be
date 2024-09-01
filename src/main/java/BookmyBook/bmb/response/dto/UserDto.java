@@ -9,11 +9,11 @@ public class UserDto {
 
     private String user_id;
     private String nickname;
-    private UserRole userRole;
+    private UserRole role;
 
-    public UserDto (String user_id, String nickname, UserRole userRole) {
+    public UserDto (String user_id, String nickname, UserRole role) {
         this.user_id = user_id;
         this.nickname = nickname;
-        this.userRole = userRole;
+        this.role = role;
     }
 }
