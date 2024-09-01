@@ -66,6 +66,7 @@ public class LoanService {
     }
 
     //대출여부에 따른 status 업데이트
+    @Transactional
     public void updateBookStatus(String user_id, List<String> isbns){
         //모든 도서 상태를 AVALIABLE로 초기화
         List<Book> books = bookRepository.findByIsbnIn(isbns);
@@ -83,6 +84,7 @@ public class LoanService {
     }
 
     //대출여부에 따른 status 업데이트
+    @Transactional
     public void updateBookStatus(String user_id, String isbn){
         //모든 도서 상태를 AVALIABLE로 초기화
         List<Book> books = bookRepository.findListByIsbn(isbn);

@@ -46,18 +46,22 @@ public class AdminApiController {
         String accessToken = authHeader.substring(7); //Bearer 제거
 
         AdminBookResponse adminBookResponse;
-        try {
-            //유효성 검사 및 기본값 설정
-            if (page < 1) page = 1;
-            if (size < 1) size = 10;
 
-            //도서 목록 조회
-            adminBookResponse = adminService.getAdminBooks(page, size, category, keyword, accessToken);
+        //유효성 검사 및 기본값 설정
+        if (page < 1) page = 1;
+        if (size < 1) size = 10;
 
-            return ResponseEntity.ok(new ApiResponse(200, "도서 목록 및 대여 정보 조회 성공", adminBookResponse));
-        } catch (Exception e){
-            throw new ExceptionResponse(404, "도서 목록 및 대여 정보 조회 실패", "FAIL_TO_LOAD_ADMIN");
+        //도서 목록 조회
+        adminBookResponse = adminService.getAdminBooks(page, size, category, keyword, accessToken);
+
+        if(adminBookResponse == null) throw new ExceptionResponse(404, "도서 목록 및 대여 정보 조회 실패", "FAIL_TO_LOAD_ADMIN");
+
+        //page > total_pages
+        if(adminBookResponse.getTotal_pages() < page){
+            throw new ExceptionResponse(400, "요청한 페이지 번호가 전체 페이지 수를 초과", "INVALID_PAGE");
         }
+
+        return ResponseEntity.ok(new ApiResponse(200, "도서 목록 및 대여 정보 조회 성공", adminBookResponse));
     }
 
     @PostMapping("admin/books") // 도서 추가
