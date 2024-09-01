@@ -21,6 +21,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.File;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -140,6 +141,11 @@ public class AdminService {
             throw new ExceptionResponse(404, "해당 도서 없음", "NOT_FOUND_BOOK");
         }
         bookRepository.deleteByIsbn(isbn);
+        File file = new File("src/main/resources/static/img/" + book.getThumbnail());
+        boolean tf = file.delete();
+        if(!tf){
+            log.info("썸네일 삭제 확인 바람.");
+        }
         log.info("삭제 완료.");
     }
 
