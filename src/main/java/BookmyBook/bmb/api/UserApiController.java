@@ -109,6 +109,11 @@ public class UserApiController {
         //도서 대여 목록 조회
         userLoanResponse = userService.getUserLoan(page, size, category, keyword, accessToken);
 
+        //page > total_pages
+        if(userLoanResponse.getTotal_pages() < page){
+            throw new ExceptionResponse(400, "요청한 페이지 번호가 전체 페이지 수를 초과", "INVALID_PAGE");
+        }
+
         return ResponseEntity.ok(new ApiResponse(200, "대여 목록 조회 성공", userLoanResponse));
     }
 
@@ -137,6 +142,11 @@ public class UserApiController {
 
         //도서 목록 조회
         userWishResponse = userService.getUserWish(page, size, category, keyword, accessToken);
+
+        //page > total_pages
+        if(userWishResponse.getTotal_pages() < page){
+            throw new ExceptionResponse(400, "요청한 페이지 번호가 전체 페이지 수를 초과", "INVALID_PAGE");
+        }
 
         return ResponseEntity.ok(new ApiResponse(200, "좋아요 목록 조회 성공", userWishResponse));
     }

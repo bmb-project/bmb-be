@@ -18,6 +18,7 @@ import BookmyBook.bmb.response.dto.UserDto;
 import BookmyBook.bmb.response.dto.UserLoanDto;
 import BookmyBook.bmb.response.dto.UserWishDto;
 import BookmyBook.bmb.security.JwtUtil;
+import jakarta.persistence.criteria.Predicate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -131,6 +132,7 @@ public class UserService {
     /**
      * 대여 목록 조회
      */
+    @Transactional
     public UserLoanResponse getUserLoan(int page, int size, String category, String keyword, String token){
         //user_id 추출
         String tokenUser_id = jwtUtil.getUserId(token, "access");
@@ -138,12 +140,8 @@ public class UserService {
         //페이징 요청에 따른 페이징 처리
         Pageable pageable = PageRequest.of(page - 1, size);
 
-        //검색 조건 설정
-        Specification<Book> spec = BookSpecification.byCategoryAndKeyword(category, keyword);
-
         //도서 목록 조회
-        Page<Book> bookPage = bookRepository.findAll(spec, pageable);
-        List<Book> books = bookPage.getContent();
+        List<Book> books = bookRepository.findAll();
 
         // 도서 Isbn 리스트 가져오기
         List<String> isbns = books.stream()
@@ -153,18 +151,24 @@ public class UserService {
         //도서 status 업데이트
         loanService.updateBookStatus(tokenUser_id, isbns);
 
-        // CHECKEDOUT 상태인 책만 필터링
-        books = books.stream()
-                .filter(book -> BookStatus.CHECKED_OUT.equals(book.getStatus()))
-                .toList();
+        // CHECKEDOUT 상태인 도서만 필터링하는 Specification
+        Specification<Book> checkedOutSpec = (root, query, criteriaBuilder) -> {
+            Predicate statusPredicate = criteriaBuilder.equal(root.get("status"), BookStatus.CHECKED_OUT);
+            Predicate categoryAndKeywordPredicate = BookSpecification.byCategoryAndKeyword(category, keyword).toPredicate(root, query, criteriaBuilder);
+            return criteriaBuilder.and(statusPredicate, categoryAndKeywordPredicate);
+        };
+
+        // CHECKEDOUT 상태인 도서만 필터링 (페이징을 포함한 새로운 조회)
+        Page<Book> checkedOutBookPage = bookRepository.findAll(checkedOutSpec, pageable);
+        List<Book> checkedOutBooks = checkedOutBookPage.getContent();
 
         // 도서의 Isbn 리스트
-        isbns = books.stream()
+        List<String> checkedOutIsbns = checkedOutBooks.stream()
                 .map(Book::getIsbn)
                 .collect(Collectors.toList());
 
         // 대여 기록 조회
-        List<Loan> loans = loanRepository.findByIsbnIn(isbns);
+        List<Loan> loans = loanRepository.findByIsbnIn(checkedOutIsbns);
 
         // ISBN을 키로 하는 대여 기록 맵 생성 (중복 처리)
         Map<String, Loan> loanMap = loans.stream()
@@ -175,7 +179,7 @@ public class UserService {
                 ));
 
         // BookDto로 변환
-        List<UserLoanDto> bookDtos = books.stream().map(book -> {
+        List<UserLoanDto> bookDtos = checkedOutBooks.stream().map(book -> {
             Loan loan = loanMap.get(book.getIsbn());
             return new UserLoanDto(
                     book.getIsbn(),
@@ -191,12 +195,17 @@ public class UserService {
 
         }).toList();
 
+        // 대여된 책의 총 개수를 계산
+        long totalCheckedOutBooks = bookRepository.count(checkedOutSpec);
+        int total_pages = 1;
+        if(totalCheckedOutBooks != 0) total_pages = (int) Math.ceil((double) totalCheckedOutBooks / size);
+
         // 응답 객체 생성
         UserLoanResponse response = new UserLoanResponse();
-        response.setTotal_pages(bookPage.getTotalPages());
-        response.setCurrent_page(pageable.getPageNumber() + 1);
+        response.setTotal_pages(total_pages); // 총 페이지 수 계산
+        response.setCurrent_page(pageable.getPageNumber() + 1); // 1부터 시작하는 페이지 번호
         response.setPage_size(pageable.getPageSize());
-        response.setTotal_items(bookPage.getTotalElements());
+        response.setTotal_items((int) totalCheckedOutBooks); // 전체 대여 도서 수
         response.setCategory(category);
         response.setKeyword(keyword);
         response.setBooks(bookDtos);
@@ -214,15 +223,11 @@ public class UserService {
         //페이징 요청에 따른 페이징 처리
         Pageable pageable = PageRequest.of(page - 1, size);
 
-        //검색 조건 설정
-        Specification<Book> spec = BookSpecification.byCategoryAndKeyword(category, keyword);
-
         //도서 목록 조회
-        Page<Book> bookPage = bookRepository.findAll(spec, pageable);
-        List<Book> books = bookPage.getContent();
+        List<Book> bookPage = bookRepository.findAll();
 
         // 도서 Isbn 리스트 가져오기
-        List<String> isbns = books.stream()
+        List<String> isbns = bookPage.stream()
                 .map(Book::getIsbn)
                 .collect(Collectors.toList());
 
@@ -236,26 +241,38 @@ public class UserService {
         List<String> isbnList = wishes.stream()
                 .map(wish -> wish.getBook().getIsbn()).distinct().collect(Collectors.toList());
 
-        // ISBN으로 도서 목록 조회
-        List<Book> wishedBooks = bookRepository.findByIsbnIn(isbnList);
+        // ISBN 리스트로 필터링하는 Specification (상태 조건 제거)
+        Specification<Book> wishSpec = (root, query, criteriaBuilder) -> {
+            Predicate isbnPredicate = root.get("isbn").in(isbnList); // 좋아요 ISBN 필터링
+            Predicate categoryAndKeywordPredicate = BookSpecification.byCategoryAndKeyword(category, keyword).toPredicate(root, query, criteriaBuilder);
+            return criteriaBuilder.and(isbnPredicate, categoryAndKeywordPredicate);
+        };
+
+        // 필터링된 도서 목록 조회 (페이징을 포함한 조회)
+        Page<Book> filteredBookPage = bookRepository.findAll(wishSpec, pageable);
+        List<Book> filteredBooks = filteredBookPage.getContent();
 
         // 도서 정보를 UserWishDto로 변환
-        List<UserWishDto> wishDtos = wishedBooks.stream().map(book -> new UserWishDto(
-                book.getIsbn(),
-                book.getTitle(),
-                book.getThumbnail(),
-                book.getAuthor_name(),
-                book.getPublisher_name(),
-                book.getStatus()
+        List<UserWishDto> wishDtos = filteredBooks.stream()
+                .map(book -> new UserWishDto(
+                        book.getIsbn(),
+                        book.getTitle(),
+                        book.getThumbnail(),
+                        book.getAuthor_name(),
+                        book.getPublisher_name(),
+                        book.getStatus()
+                ))
+                .collect(Collectors.toList());
 
-        )).toList();
+        int total_pages = 1;
+        if(filteredBookPage.getTotalPages() != 0) total_pages = filteredBookPage.getTotalPages();
 
         // 응답 객체 생성
         UserWishResponse response = new UserWishResponse();
-        response.setTotal_pages(bookPage.getTotalPages());
+        response.setTotal_pages(total_pages);
         response.setCurrent_page(pageable.getPageNumber() + 1);
         response.setPage_size(pageable.getPageSize());
-        response.setTotal_items(bookPage.getTotalElements());
+        response.setTotal_items((int) filteredBookPage.getTotalElements());
         response.setCategory(category);
         response.setKeyword(keyword);
         response.setBooks(wishDtos);
