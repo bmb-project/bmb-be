@@ -33,8 +33,6 @@ public class AdminApiController {
     private final AdminService adminService;
     private final JwtUtil jwtUtil;
 
-
-
     //admin 도서 목록
     @GetMapping("/admin/books")
     @PreAuthorize("hasRole('Admin')")
@@ -69,16 +67,31 @@ public class AdminApiController {
 
     @PostMapping("admin/books") // 도서 추가
     @PreAuthorize("hasRole('Admin')")
-    public ResponseEntity<?> insertBook(
-            @RequestPart("bookData") CreateBookRequest request,
-            @RequestPart("thumbnail") MultipartFile thumbnailFile) {
-        // 로그 추가
-        log.info("Received request to insert book: {}", request);
-
-        if(request.getIsbn().length() != 13) {
+    public ResponseEntity<?> insertBook(@ModelAttribute CreateBookRequest request) {
+        log.info("파일 이름 : {}", request.getThumbnail().toString());
+        if (request.isbn.length() != 13) {
             throw new ExceptionResponse(400, "잘못된 ISBN", "INVALID_ISBN_ADMIN");
         }
         adminService.youHere(request.getIsbn());
+
+        // 파일크기 제한을 걸기는 했는데, yml파일 선에서 알아서 컷 해주는 겉 같습니다. 이 조건문이 쓰이진 않아요.
+        if(request.getThumbnail().getSize() > 1024 * 1024 * 5){
+            throw new ExceptionResponse(407, "파일 크기 제한 5MB", "TOO_BIG_FILE_SIZE");
+        }else{
+            // 길면 보기 안 좋으니 fileType로 줄임.
+            String fileType = request.getThumbnail().getContentType();
+            log.info(fileType);
+            if(fileType.equalsIgnoreCase("image/png") ||
+                    fileType.equalsIgnoreCase("image/jpg") ||
+                    fileType.equalsIgnoreCase("image/jpeg") ||
+                    fileType.equalsIgnoreCase("image/webp") ||
+                    fileType.equalsIgnoreCase("image/gif") ||
+                    fileType.equalsIgnoreCase("image/bmp")){
+
+            }else{
+                throw new ExceptionResponse(406, "잘못된 파일 형식", "DO_NOT_USE_THIS_TYPE");
+            }
+        }
 
         try {
             Book book = new Book();
@@ -91,29 +104,17 @@ public class AdminApiController {
             book.setCreated_at(LocalDateTime.now());
 
             // 썸네일 이미지 파일 처리
-            if(thumbnailFile.getSize() < 1024 * 1024 * 5) {
-                String fileType = thumbnailFile.getContentType();
+            MultipartFile thumbnailFile = request.getThumbnail();
+            if (thumbnailFile != null && !thumbnailFile.isEmpty()) {
+                // 파일을 서버에 저장하고, 파일 경로 또는 URL을 데이터베이스에 저장
+                String fileName = UUID.randomUUID().toString() + "_" + thumbnailFile.getOriginalFilename();
+                Path path = Paths.get("src/main/resources/static/img/" + fileName);
+                Files.copy(thumbnailFile.getInputStream(), path);
 
-                if(fileType.equalsIgnoreCase("image/png") ||
-                        fileType.equalsIgnoreCase("image/jpg") ||
-                        fileType.equalsIgnoreCase("image/jpeg") ||
-                        fileType.equalsIgnoreCase("image/webp") ||
-                        fileType.equalsIgnoreCase("image/gif") ||
-                        fileType.equalsIgnoreCase("image/bmp")) {
-
-                    String fileName = UUID.randomUUID().toString() + "_" + thumbnailFile.getOriginalFilename();
-                    Path path = Paths.get("src/main/resources/static/img/" + fileName);
-                    Files.copy(thumbnailFile.getInputStream(), path);
-
-                    book.setThumbnail(fileName);
-                } else {
-                    throw new ExceptionResponse(406, "잘못된 파일 형식", "DO_NOT_USE_THIS_TYPE");
-                }
-            } else {
-                throw new ExceptionResponse(407, "파일의 크기가 5MB를 넘습니다", "TOO_BIG_FILE_SIZE");
+                book.setThumbnail(fileName);  // 저장된 파일의 경로 또는 URL을 설정
             }
 
-            if(request.isAvailable()) {
+            if (request.isAvailable()) {
                 book.setStatus(BookStatus.AVAILABLE);
             } else {
                 throw new ExceptionResponse(401, "available의 값이 true가 아닙니다.", "AVAILABLE_IS_NOT_TRUE");
@@ -121,7 +122,7 @@ public class AdminApiController {
 
             boolean insert = adminService.insert(book);
 
-            if(insert) {
+            if (insert) {
                 BookDetail_DTO bookDto = new BookDetail_DTO(book.getIsbn(), book.getTitle(),
                         book.getDescription(), book.getThumbnail(), book.getAuthor_name(),
                         book.getPublisher_name(), book.getPublished_date(), book.getCreated_at(), book.getStatus());
@@ -130,6 +131,7 @@ public class AdminApiController {
             } else {
                 return ResponseEntity.ok(new ApiResponse(404, "도서 등록 실패", ""));
             }
+
         } catch (Exception e) {
             throw new ExceptionResponse(410, "처리 과정 중 예외 발생", "EXCEPTION_ADMIN");
         }
@@ -180,13 +182,11 @@ public class AdminApiController {
         private String title;
         private String author_name;
         private String publisher_name;
-        // 파일 업로드를 위한 필드 추가
         private MultipartFile thumbnail;
         private String description;
         private LocalDate published_date;
         private LocalDateTime created_at;
         private boolean available;
-
     }
 
 }

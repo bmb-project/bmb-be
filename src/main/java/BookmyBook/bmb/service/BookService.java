@@ -7,6 +7,7 @@ import BookmyBook.bmb.repository.BookRepository;
 import BookmyBook.bmb.repository.WishRepository;
 import BookmyBook.bmb.response.BookResponse;
 import BookmyBook.bmb.response.ExceptionResponse;
+import BookmyBook.bmb.response.dto.BookDetailNoID_DTO;
 import BookmyBook.bmb.response.dto.BookDto;
 import BookmyBook.bmb.response.dto.BookDetail_DTO;
 import BookmyBook.bmb.response.dto.WishDto;
@@ -184,17 +185,17 @@ public class BookService {
     }
 
     //도서 한 권 상세정보
-    public BookDetail_DTO bookView(String isbn){
+    public BookDetailNoID_DTO bookView(String isbn){
 
         Book book = bookRepository.findByIsbn(isbn);
         if(book == null){
             throw new ExceptionResponse(404, "해당 도서 없음", "NOT_FOUND_BOOK");
         }
 
-        BookDetail_DTO dto = new BookDetail_DTO(book.getTitle(),
-                book.getDescription(), book.getThumbnail(), book.getAuthor_name(),
+        BookDetailNoID_DTO dto = new BookDetailNoID_DTO(book.getIsbn(), book.getTitle(),
+                book.getDescription(), "src/main/resources/static/img/" + book.getThumbnail(), book.getAuthor_name(),
                 book.getPublisher_name(), book.getPublished_date(), book.getCreated_at(), book.getStatus());
-        // Optional의 값이 존재하는 경우 DTO로 변환, 없으면 null 반환
+
         return dto;
     }
 

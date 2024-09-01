@@ -25,4 +25,4 @@ logging:
     org.hibernate.type: trace
 
 file:
-  upload-dir=: src/main/resources/static/img  # 업로드 파일을 저장할 디렉토리
+  upload-dir: src/main/resources/static/img/

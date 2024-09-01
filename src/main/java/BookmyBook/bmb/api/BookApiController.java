@@ -5,6 +5,7 @@ import BookmyBook.bmb.domain.BookStatus;
 import BookmyBook.bmb.response.ApiResponse;
 import BookmyBook.bmb.response.BookResponse;
 import BookmyBook.bmb.response.ExceptionResponse;
+import BookmyBook.bmb.response.dto.BookDetailNoID_DTO;
 import BookmyBook.bmb.response.dto.BookDetail_DTO;
 import BookmyBook.bmb.response.dto.WishDto;
 import BookmyBook.bmb.security.JwtUtil;
@@ -147,9 +148,9 @@ public class BookApiController {
     @GetMapping("/books/{isbn}")
     @PreAuthorize("hasRole('User') or hasRole('Admin')")
     public ResponseEntity<?> viewBook(@PathVariable("isbn") String isbn) {
-        log.info(isbn);
+
         log.info("/books/??? Start : " + isbn);
-        BookDetail_DTO bookDto = null;
+        BookDetailNoID_DTO bookDto;
 
         // 도서 존재 확인
         boolean tf = bookService.bookKakuninn(isbn);
@@ -162,8 +163,6 @@ public class BookApiController {
             log.info("도서 ISBN : {}에 해당하는 도서를 찾을 수 없습니다.", isbn);
             throw new ExceptionResponse(404, "해당 isbn 책 없음", "NOT_FOUNDED_ISBN");
         }
-
-        log.info("/books/??? End");
 
         if (bookDto != null) {
             log.info("아래는 출력된 결과물입니다.");
