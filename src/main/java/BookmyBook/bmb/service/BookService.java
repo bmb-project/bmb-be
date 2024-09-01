@@ -219,13 +219,4 @@ public class BookService {
         }
     }
 
-    // ID로 도서 가져오기 dto
-//    public SeonwooBook_DTO bookBringId(long id){
-//        Optional<Book> book = bookRepository.findById(id);
-//        SeonwooBook_DTO dto = new SeonwooBook_DTO(book.get().getIsbn(), book.get().getId(), book.get().getTitle(), book.get().getThumbnail(),
-//                book.get().getAuthor_name(), book.get().getPublisher_name(), book.get().getStatus(), book.get().getDescription(),
-//                book.get().getPublished_date(), book.get().getCreated_at());
-//        return dto;
-//    }
-
 }

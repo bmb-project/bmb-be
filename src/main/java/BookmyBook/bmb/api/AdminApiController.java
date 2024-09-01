@@ -16,9 +16,14 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Controller
 @RequiredArgsConstructor
@@ -27,6 +32,8 @@ public class AdminApiController {
 
     private final AdminService adminService;
     private final JwtUtil jwtUtil;
+
+
 
     //admin 도서 목록
     @GetMapping("/admin/books")
@@ -62,48 +69,70 @@ public class AdminApiController {
 
     @PostMapping("admin/books") // 도서 추가
     @PreAuthorize("hasRole('Admin')")
-    public ResponseEntity<?> insertBook(@RequestBody CreateBookRequest request){
+    public ResponseEntity<?> insertBook(
+            @RequestPart("bookData") CreateBookRequest request,
+            @RequestPart("thumbnail") MultipartFile thumbnailFile) {
+        // 로그 추가
+        log.info("Received request to insert book: {}", request);
 
-        if(request.isbn.length() != 13) {
+        if(request.getIsbn().length() != 13) {
             throw new ExceptionResponse(400, "잘못된 ISBN", "INVALID_ISBN_ADMIN");
         }
-        adminService.youHere(request.isbn);
+        adminService.youHere(request.getIsbn());
 
         try {
             Book book = new Book();
-            book.setIsbn(request.isbn);
-            book.setTitle(request.title);
-            book.setAuthor_name(request.author_name);
-            book.setPublisher_name(request.publisher_name);
-            book.setThumbnail(request.thumbnail);
-            book.setDescription(request.description);
-            book.setPublished_date(request.published_date);
+            book.setIsbn(request.getIsbn());
+            book.setTitle(request.getTitle());
+            book.setAuthor_name(request.getAuthor_name());
+            book.setPublisher_name(request.getPublisher_name());
+            book.setDescription(request.getDescription());
+            book.setPublished_date(request.getPublished_date());
             book.setCreated_at(LocalDateTime.now());
-            log.info("asdf : {}", request.available);
 
-            if(request.available){
+            // 썸네일 이미지 파일 처리
+            if(thumbnailFile.getSize() < 1024 * 1024 * 5) {
+                String fileType = thumbnailFile.getContentType();
+
+                if(fileType.equalsIgnoreCase("image/png") ||
+                        fileType.equalsIgnoreCase("image/jpg") ||
+                        fileType.equalsIgnoreCase("image/jpeg") ||
+                        fileType.equalsIgnoreCase("image/webp") ||
+                        fileType.equalsIgnoreCase("image/gif") ||
+                        fileType.equalsIgnoreCase("image/bmp")) {
+
+                    String fileName = UUID.randomUUID().toString() + "_" + thumbnailFile.getOriginalFilename();
+                    Path path = Paths.get("src/main/resources/static/img/" + fileName);
+                    Files.copy(thumbnailFile.getInputStream(), path);
+
+                    book.setThumbnail(fileName);
+                } else {
+                    throw new ExceptionResponse(406, "잘못된 파일 형식", "DO_NOT_USE_THIS_TYPE");
+                }
+            } else {
+                throw new ExceptionResponse(407, "파일의 크기가 5MB를 넘습니다", "TOO_BIG_FILE_SIZE");
+            }
+
+            if(request.isAvailable()) {
                 book.setStatus(BookStatus.AVAILABLE);
-            }else {
+            } else {
                 throw new ExceptionResponse(401, "available의 값이 true가 아닙니다.", "AVAILABLE_IS_NOT_TRUE");
             }
 
             boolean insert = adminService.insert(book);
 
-            if(insert){
+            if(insert) {
                 BookDetail_DTO bookDto = new BookDetail_DTO(book.getIsbn(), book.getTitle(),
                         book.getDescription(), book.getThumbnail(), book.getAuthor_name(),
                         book.getPublisher_name(), book.getPublished_date(), book.getCreated_at(), book.getStatus());
 
                 return ResponseEntity.ok(new ApiResponse(201, "도서 등록 성공", bookDto));
-            }else {
+            } else {
                 return ResponseEntity.ok(new ApiResponse(404, "도서 등록 실패", ""));
             }
-
-        }catch (Exception e){
+        } catch (Exception e) {
             throw new ExceptionResponse(410, "처리 과정 중 예외 발생", "EXCEPTION_ADMIN");
         }
-
-
     }
 
     @DeleteMapping("/books") // ID로 한 권 선택 삭제
@@ -151,11 +180,13 @@ public class AdminApiController {
         private String title;
         private String author_name;
         private String publisher_name;
-        private String thumbnail;
+        // 파일 업로드를 위한 필드 추가
+        private MultipartFile thumbnail;
         private String description;
         private LocalDate published_date;
         private LocalDateTime created_at;
         private boolean available;
+
     }
 
 }

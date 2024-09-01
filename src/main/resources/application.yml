@@ -13,7 +13,16 @@ spring:
         format_sql: true
   config:
     import: classpath:env.yml
+
+  servlet:
+    multipart:
+      max-file-size: 5MB     # 업로드할 수 있는 파일의 최대 크기
+      max-request-size: 5MB  # 멀티파트 요청의 전체 크기 제한
+
 logging:
   level:
     org.hibernate.SQL: debug
     org.hibernate.type: trace
+
+file:
+  upload-dir=: src/main/resources/static/img  # 업로드 파일을 저장할 디렉토리
