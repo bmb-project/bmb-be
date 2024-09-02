@@ -131,7 +131,6 @@ public class AdminApiController {
             throw new ExceptionResponse(500, "도서 삭제 실패 - 대여 중인 도서 삭제 시도", "NOT_EXIST_BOOK_ADMIN");
         }
 
-        log.info("ID : {}", bookDto.getId());
         log.info("ISBN : {}", bookDto.getIsbn());
         log.info("Title : {}", bookDto.getTitle());
         log.info("Author name : {}", bookDto.getAuthor_name());

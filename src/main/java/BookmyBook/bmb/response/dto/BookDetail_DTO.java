@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @Setter
 public class BookDetail_DTO {
 
-    private long id;
+
     private String isbn;
     private String title;
     private String description;
@@ -29,43 +29,11 @@ public class BookDetail_DTO {
 
 
     // 기본 생성자
-    public BookDetail_DTO(long id, String isbn, String title, String description, String thumbnail,
-                          String author_name, String publisher_name, LocalDate published_date,
-                          LocalDateTime created_at, BookStatus status) {
-
-        this.id = id;
-        this.isbn = isbn;
-        this.title = title;
-        this.description = description;
-        this.thumbnail = thumbnail;
-        this.author_name = author_name;
-        this.publisher_name = publisher_name;
-        this.published_date = published_date;
-        this.created_at = created_at;
-        this.status = status;
-    }
-
-    // 도서 추가
     public BookDetail_DTO(String isbn, String title, String description, String thumbnail,
                           String author_name, String publisher_name, LocalDate published_date,
                           LocalDateTime created_at, BookStatus status) {
 
         this.isbn = isbn;
-        this.title = title;
-        this.description = description;
-        this.thumbnail = thumbnail;
-        this.author_name = author_name;
-        this.publisher_name = publisher_name;
-        this.published_date = published_date;
-        this.created_at = created_at;
-        this.status = status;
-    }
-
-    // 도서 상세보기
-    public BookDetail_DTO(String title, String description, String thumbnail,
-                          String author_name, String publisher_name, LocalDate published_date,
-                          LocalDateTime created_at, BookStatus status) {
-
         this.title = title;
         this.description = description;
         this.thumbnail = thumbnail;

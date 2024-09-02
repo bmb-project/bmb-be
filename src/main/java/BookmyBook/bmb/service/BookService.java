@@ -1,9 +1,9 @@
 package BookmyBook.bmb.service;
 
-import BookmyBook.bmb.domain.Book;
-import BookmyBook.bmb.domain.BookSpecification;
-import BookmyBook.bmb.domain.Wish;
+import BookmyBook.bmb.domain.*;
 import BookmyBook.bmb.repository.BookRepository;
+import BookmyBook.bmb.repository.LoanRepository;
+import BookmyBook.bmb.repository.RefreshTokenRepository;
 import BookmyBook.bmb.repository.WishRepository;
 import BookmyBook.bmb.response.BookResponse;
 import BookmyBook.bmb.response.ExceptionResponse;
@@ -24,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -35,6 +36,9 @@ public class BookService {
     private final BookRepository bookRepository;
     private final WishRepository wishRepository;
     private final LoanService loanService;
+    private final LoanRepository loanRepository;
+    private final RefreshTokenRepository refreshTokenRepository;
+
     private final JwtUtil jwtUtil;
 
     //도서 목록 조회
@@ -184,16 +188,27 @@ public class BookService {
     }
 
     //도서 한 권 상세정보
-    public BookDetail_DTO bookView(String isbn){
+    public BookDetail_DTO bookView(String isbn, String token){
 
         Book book = bookRepository.findByIsbn(isbn);
         if(book == null){
             throw new ExceptionResponse(404, "해당 도서 없음", "NOT_FOUND_BOOK");
         }
+        String user_id = jwtUtil.getUserId(token, "access");
 
-        BookDetail_DTO dto = new BookDetail_DTO(book.getTitle(),
+        Loan loan = loanRepository.findByIsbnAndReturnAtIsNullAndUserId(isbn, user_id);
+        boolean b = loanRepository.existsByIsbnAndReturnAtIsNull(isbn);
+        BookStatus bs = BookStatus.UNAVAILABLE;
+        if(!b){
+            bs = BookStatus.AVAILABLE;
+        }
+        if(loan != null){
+            bs = BookStatus.CHECKED_OUT;
+        }
+
+        BookDetail_DTO dto = new BookDetail_DTO(book.getIsbn(), book.getTitle(),
                 book.getDescription(), book.getThumbnail(), book.getAuthor_name(),
-                book.getPublisher_name(), book.getPublished_date(), book.getCreated_at(), book.getStatus());
+                book.getPublisher_name(), book.getPublished_date(), book.getCreated_at(), bs);
         // Optional의 값이 존재하는 경우 DTO로 변환, 없으면 null 반환
         return dto;
     }
