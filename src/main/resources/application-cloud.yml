@@ -1,6 +1,4 @@
 spring:
-  profiles:
-    active: cloud
   datasource:
     url: jdbc:mariadb://${TODO_MARIADB_HOST}:${TODO_MARIADB_PORT}/${TODO_DATA_BASE_NAME}?useSSL=false
     username: ${TODO_MARIADB_USER_NAME}
