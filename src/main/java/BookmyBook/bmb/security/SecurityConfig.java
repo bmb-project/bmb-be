@@ -38,6 +38,7 @@ public class SecurityConfig {
                         authorizeRequests
                                 .requestMatchers("/user/signin").permitAll() // 로그인 API는 인증 없이 접근 가능
                                 .requestMatchers("/user/signup").permitAll() // 회원가입 API
+                                .requestMatchers("/user/signout").authenticated() //로그아웃
                                 .requestMatchers("/user/loan").authenticated() //회원별도서목록조회
                                 .requestMatchers("/user/wish").authenticated() //회원별좋아요목록조회
                                 .requestMatchers("/books").authenticated() //도서목록조회
