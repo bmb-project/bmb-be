@@ -148,7 +148,7 @@ public class AdminService {
         if(book == null){
             throw new ExceptionResponse(404, "해당 도서 없음", "NOT_FOUND_BOOK");
         }
-        BookDetail_DTO dto = new BookDetail_DTO(book.getId(), book.getIsbn(), book.getTitle(),
+        BookDetail_DTO dto = new BookDetail_DTO(book.getIsbn(), book.getTitle(),
                 book.getDescription(), book.getThumbnail(), book.getAuthor_name(),
                 book.getPublisher_name(), book.getPublished_date(), book.getCreated_at(), book.getStatus());
         log.info("겟또 완료.");
