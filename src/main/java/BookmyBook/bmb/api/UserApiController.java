@@ -83,6 +83,32 @@ public class UserApiController {
         return ResponseEntity.ok(new TokenResponse(200, "로그인 성공", accessToken, userDto));
     }
 
+    //로그아웃
+    @PostMapping("/user/signout")
+    @PreAuthorize("hasRole('User') or hasRole('Admin')")
+    public ResponseEntity<?> signout(HttpServletRequest request, HttpServletResponse response){
+
+        //Authorization header에서 token 추출
+        String authHeader = request.getHeader("Authorization");
+        if(authHeader == null || !authHeader.startsWith("Bearer")){
+            throw new ExceptionResponse(401, "존재하지 않는 TOKEN", "INVALID_TOKEN");
+        }
+
+        try {
+            // 쿠키에서 refreshToken 삭제
+            Cookie cookie = new Cookie("refreshToken", null);
+            cookie.setHttpOnly(true); // XSS 공격 방지
+            cookie.setPath("/"); // 쿠키 경로 설정
+            cookie.setMaxAge(0); // 쿠키 만료 설정 (0으로 설정하면 삭제됨)
+            response.addCookie(cookie);
+
+            return ResponseEntity.ok(new ApiResponse(200, "로그아웃 성공", null));
+        }catch (Exception e){
+            throw new ExceptionResponse(500, "로그아웃 실패", "LOGOUT_FAILED");
+        }
+
+    }
+
     //회원별 대여 목록 조회
     @GetMapping("/user/loan")
     @PreAuthorize("hasRole('User') or hasRole('Admin')")
@@ -100,14 +126,12 @@ public class UserApiController {
         }
         String accessToken = authHeader.substring(7); //Bearer 제거
 
-        UserLoanResponse userLoanResponse;
-
         //유효성 검사 및 기본값 설정
         if (page < 1) page = 1;
         if (size < 1) size = 10;
 
         //도서 대여 목록 조회
-        userLoanResponse = userService.getUserLoan(page, size, category, keyword, accessToken);
+        UserLoanResponse userLoanResponse = userService.getUserLoan(page, size, category, keyword, accessToken);
 
         //page > total_pages
         if(userLoanResponse.getTotal_pages() < page){
@@ -134,14 +158,12 @@ public class UserApiController {
         }
         String accessToken = authHeader.substring(7); //Bearer 제거
 
-        UserWishResponse userWishResponse;
-
         //유효성 검사 및 기본값 설정
         if (page < 1) page = 1;
         if (size < 1) size = 10;
 
         //도서 목록 조회
-        userWishResponse = userService.getUserWish(page, size, category, keyword, accessToken);
+        UserWishResponse userWishResponse = userService.getUserWish(page, size, category, keyword, accessToken);
 
         //page > total_pages
         if(userWishResponse.getTotal_pages() < page){
