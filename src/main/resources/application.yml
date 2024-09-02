@@ -1,20 +1,7 @@
 spring:
   profiles:
     active: ${PROFILE:local} # 기본 프로파일을 'local'로 설정
-  datasource:
-    url: jdbc:h2:tcp://localhost/~/bmb
-    username: sa
-    password:
-    driver-class-name: org.h2.Driver
-  jpa:
-    hibernate:
-      ddl-auto: update
-    properties:
-      hibernate:
-        # show_sql: true
-        format_sql: true
-  config:
-    import: classpath:env.yml
+
 logging:
   level:
     org.hibernate.SQL: debug
