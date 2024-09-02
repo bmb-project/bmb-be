@@ -12,3 +12,6 @@ spring:
       hibernate:
         format_sql: true
         dialect: org.hibernate.dialect.MariaDB103Dialect
+jwt:
+  secret: 2824a16d2faf15b639baabd6022a302835659bba7bba7a62fc96452d88c5137d8071f009daccc3ebbc120b98911ab97340ac7bf12a43c6cecb8ef781230061d1
+  refresh-secret: fef8d5b9dee8eaa429317eea923292837407fb76b85acc4da42bf035bd0a1d81d1200d9ab3832325f4e90da8cdae22e1823e24f3397d4200a5b24fe8f3c15339
