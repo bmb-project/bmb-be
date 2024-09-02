@@ -3,7 +3,6 @@ package BookmyBook.bmb.service;
 import BookmyBook.bmb.domain.*;
 import BookmyBook.bmb.repository.BookRepository;
 import BookmyBook.bmb.repository.LoanRepository;
-import BookmyBook.bmb.repository.RefreshTokenRepository;
 import BookmyBook.bmb.repository.WishRepository;
 import BookmyBook.bmb.response.BookResponse;
 import BookmyBook.bmb.response.ExceptionResponse;
@@ -24,7 +23,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -37,7 +35,6 @@ public class BookService {
     private final WishRepository wishRepository;
     private final LoanService loanService;
     private final LoanRepository loanRepository;
-    private final RefreshTokenRepository refreshTokenRepository;
 
     private final JwtUtil jwtUtil;
 
@@ -84,10 +81,12 @@ public class BookService {
             );
         }).collect(Collectors.toList());
 
+        int total_pages = 1;
+        if(bookPage.getTotalPages() != 0) total_pages = bookPage.getTotalPages();
 
         // 응답 객체 생성
         BookResponse response = new BookResponse();
-        response.setTotal_pages(bookPage.getTotalPages());
+        response.setTotal_pages(total_pages);
         response.setCurrent_page(pageable.getPageNumber() + 1);
         response.setPage_size(pageable.getPageSize());
         response.setTotal_items(bookPage.getTotalElements());

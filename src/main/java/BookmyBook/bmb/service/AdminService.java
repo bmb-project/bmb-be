@@ -99,9 +99,12 @@ public class AdminService {
             );
         }).collect(Collectors.toList());
 
+        int total_pages = 1;
+        if(bookPage.getTotalPages() != 0) total_pages = bookPage.getTotalPages();
+
         // 응답 객체 생성
         AdminBookResponse response = new AdminBookResponse();
-        response.setTotal_pages(bookPage.getTotalPages());
+        response.setTotal_pages(total_pages);
         response.setCurrent_page(pageable.getPageNumber() + 1);
         response.setPage_size(pageable.getPageSize());
         response.setTotal_items(bookPage.getTotalElements());

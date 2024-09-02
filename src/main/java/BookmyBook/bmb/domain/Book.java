@@ -22,7 +22,7 @@
         @Column(nullable = false)
         private String title; //도서 제목
 
-        @Column(nullable = false)
+        @Column(nullable = false, length = 1000)
         private String description; //도서 설명
 
         @Column(nullable = false)
