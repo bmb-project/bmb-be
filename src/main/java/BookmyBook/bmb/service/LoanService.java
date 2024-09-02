@@ -88,7 +88,6 @@ public class LoanService {
     public void updateBookStatus(String user_id, String isbn){
         //모든 도서 상태를 AVALIABLE로 초기화
         List<Book> books = bookRepository.findListByIsbn(isbn);
-        if(books.isEmpty()) throw new ExceptionResponse(404, "해당 isbn의 책 없음", "NOT_FOUNDED_ISBN");
 
         for (Book book: books){
             BookStatus status = BookStatus.AVAILABLE;

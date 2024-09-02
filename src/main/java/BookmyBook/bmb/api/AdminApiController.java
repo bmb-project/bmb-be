@@ -54,8 +54,6 @@ public class AdminApiController {
         //도서 목록 조회
         adminBookResponse = adminService.getAdminBooks(page, size, category, keyword, accessToken);
 
-        if(adminBookResponse == null) throw new ExceptionResponse(404, "도서 목록 및 대여 정보 조회 실패", "FAIL_TO_LOAD_ADMIN");
-
         //page > total_pages
         if(adminBookResponse.getTotal_pages() < page){
             throw new ExceptionResponse(400, "요청한 페이지 번호가 전체 페이지 수를 초과", "INVALID_PAGE");
