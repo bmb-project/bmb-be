@@ -191,7 +191,7 @@ public class BookService {
 
         Book book = bookRepository.findByIsbn(isbn);
         if(book == null){
-            throw new ExceptionResponse(404, "해당 도서 없음", "NOT_FOUND_BOOK");
+            throw new ExceptionResponse(404, "해당 isbn 책 없음", "NOT_FOUNDED_ISBN");
         }
         String user_id = jwtUtil.getUserId(token, "access");
 
