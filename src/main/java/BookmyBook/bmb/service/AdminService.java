@@ -123,8 +123,18 @@ public class AdminService {
     @Transactional
     public boolean insert(Book book) {
         log.info("adminService - insert Start & End");
+        if(bookRepository.findByIsbn(book.getIsbn()) != null){
+            throw new ExceptionResponse(409, "동일한 ISBN의 도서가 존재합니다", "BOOK_ALREADY_INSERT");
+        }
 
+        if(book.getDescription().length() > 1000){
+            throw new ExceptionResponse(400, "소개글은 1000자 이하로 입력 가능합니다", "INVALID_DESCRIPTION");
+        }
+
+        // 원래는 Thumbnail에 이미지가 저장된 주소가 들어가지만, 지금은 일단 '어디론가의 위치'로 통일.
+        book.setThumbnail("어디론가의 위치");
         Book b2 = bookRepository.save(book);
+
         if(b2.getId() == null){
             log.info("도서 등록 실패");
             return false;
