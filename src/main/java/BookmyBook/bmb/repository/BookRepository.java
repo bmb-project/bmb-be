@@ -17,7 +17,6 @@ public interface BookRepository extends JpaRepository<Book, Long>, JpaSpecificat
     void deleteByIsbn(String isbn);
 
 
-
     //Book findById(long id);
     //List<Book> findByIdIn(List<String> id);
 

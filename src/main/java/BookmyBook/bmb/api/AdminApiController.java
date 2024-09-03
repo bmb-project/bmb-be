@@ -4,6 +4,7 @@ import BookmyBook.bmb.domain.Book;
 import BookmyBook.bmb.domain.BookStatus;
 import BookmyBook.bmb.response.AdminBookResponse;
 import BookmyBook.bmb.response.ApiResponse;
+import BookmyBook.bmb.response.ApiResponseNoResult;
 import BookmyBook.bmb.response.ExceptionResponse;
 import BookmyBook.bmb.response.dto.BookDetail_DTO;
 import BookmyBook.bmb.security.JwtUtil;
@@ -110,10 +111,9 @@ public class AdminApiController {
 
     }
 
-    @DeleteMapping("/books") // ID로 한 권 선택 삭제
+    @DeleteMapping("/books/{isbn}") // ID로 한 권 선택 삭제
     @PreAuthorize("hasRole('Admin')")
-    public ResponseEntity<?> viewDelete(@RequestBody CreateBookRequest request){
-        String isbn = request.getIsbn();
+    public ResponseEntity<?> viewDelete(@PathVariable("isbn") String isbn){
         if(isbn.length() != 13){
             throw new ExceptionResponse(400, "잘못된 ISBN", "INVALID_ISBN_ADMIN");
         }
@@ -125,10 +125,10 @@ public class AdminApiController {
         // 도서가 존재하지 않을 경우 처리
         if (bookDto == null) {
             log.info("도서 ID {}에 해당하는 도서를 찾을 수 없습니다.", isbn);
-            throw new ExceptionResponse(404, "도서 목록 및 정보 조회 실패", "FAIL_TO_LOAD_ADMIN");
+            throw new ExceptionResponse(404, "해당 isbn 책 없음", "NOT_FOUNDED_ISBN");
         }else if(bookDto.getStatus() != BookStatus.AVAILABLE){
             log.info("선택한 도서는 대여 중인 도서이므로 삭제할 수 없습니다.");
-            throw new ExceptionResponse(500, "도서 삭제 실패 - 대여 중인 도서 삭제 시도", "NOT_EXIST_BOOK_ADMIN");
+            throw new ExceptionResponse(409, "대여 목록이 있어 삭제할 수 없습니다", "BOOK_HAS_LOANS");
         }
 
         log.info("ISBN : {}", bookDto.getIsbn());
@@ -143,8 +143,9 @@ public class AdminApiController {
 
         log.info("Delete Start");
         adminService.delete(bookDto.getIsbn());
+
         log.info("Delete Over");
-        return ResponseEntity.ok(new ApiResponse(200, "도서 삭제 성공"));
+        return ResponseEntity.ok(new ApiResponseNoResult(200, "도서 삭제 성공"));
     }
 
     @Data
