@@ -153,7 +153,6 @@ public class BookApiController {
         log.info("/books/??? Start : " + isbn);
         BookDetail_DTO bookDto = null;
 
-
         //Authorization header에서 token 추출
         String authHeader = request.getHeader("Authorization");
         if(authHeader == null || !authHeader.startsWith("Bearer")){
@@ -161,7 +160,6 @@ public class BookApiController {
         }
         String accessToken = authHeader.substring(7); //Bearer 제거
         log.info("Token : {}", accessToken);
-
 
         // 도서 존재 확인
         boolean tf = bookService.bookKakuninn(isbn);
@@ -174,21 +172,6 @@ public class BookApiController {
             // 도서가 존재하지 않을 경우 처리
             log.info("도서 ISBN : {}에 해당하는 도서를 찾을 수 없습니다.", isbn);
             throw new ExceptionResponse(404, "해당 isbn 책 없음", "NOT_FOUNDED_ISBN");
-        }
-
-        log.info("/books/??? End");
-
-        if (bookDto != null) {
-            log.info("아래는 출력된 결과물입니다.");
-            log.info("Title : {}", bookDto.getTitle());
-            log.info("Author name : {}", bookDto.getAuthor_name());
-            log.info("Publisher name : {}", bookDto.getPublisher_name());
-            log.info("Thumbnail : {}", bookDto.getThumbnail());
-            log.info("Description : {}", bookDto.getDescription());
-            log.info("Published_date : {}", bookDto.getPublished_date());
-            log.info("Created at : {}", bookDto.getCreated_at());
-            log.info("Status : {}", bookDto.getStatus());
-            log.info("출력된 결과물은 이상입니다.");
         }
 
         return ResponseEntity.ok(new ApiResponse(200, "도서 상세 조회 성공", bookDto));
