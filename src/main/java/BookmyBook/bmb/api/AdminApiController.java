@@ -150,7 +150,7 @@ public class AdminApiController {
     @PreAuthorize("hasRole('Admin')")
     public ResponseEntity<?> viewDelete(@PathVariable("isbn") String isbn){
         if(isbn.length() != 13){
-            throw new ExceptionResponse(400, "잘못된 ISBN", "INVALID_ISBN_ADMIN");
+            throw new ExceptionResponse(404, "해당 isbn 책 없음", "NOT_FOUNDED_ISBN");
         }
         log.info("/books Start : {}", isbn);
 
@@ -193,7 +193,7 @@ public class AdminApiController {
         //Authorization header에서 token 추출
         String authHeader = request.getHeader("Authorization");
         if(authHeader == null || !authHeader.startsWith("Bearer")){
-            throw new ExceptionResponse(401, "존재하지 않는 TOKEN", "INVALID_TOKEN");
+            throw new ExceptionResponse(403, "접근 권한이 없습니다", "NO_PERMISSION");
         }
 
         BookDetailAdmin_DTO bookDto = adminService.bookView(isbn);
