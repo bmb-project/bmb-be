@@ -6,6 +6,7 @@ import BookmyBook.bmb.response.AdminBookResponse;
 import BookmyBook.bmb.response.ApiResponse;
 import BookmyBook.bmb.response.ApiResponseNoResult;
 import BookmyBook.bmb.response.ExceptionResponse;
+import BookmyBook.bmb.response.dto.BookDetailAdmin_DTO;
 import BookmyBook.bmb.response.dto.BookDetail_DTO;
 import BookmyBook.bmb.security.JwtUtil;
 import BookmyBook.bmb.service.AdminService;
@@ -145,6 +146,25 @@ public class AdminApiController {
         log.info("Delete Over");
         return ResponseEntity.ok(new ApiResponseNoResult(200, "도서 삭제 성공"));
     }
+
+
+    // Admin 조회
+    @GetMapping("admin/books/{isbn}")
+    @PreAuthorize("hasRole('Admin')")
+    public ResponseEntity<?> adminViewBook(@PathVariable("isbn") String isbn, HttpServletRequest request){
+        log.info("Start adminViewBook() | ISBN : {}", isbn);
+
+        //Authorization header에서 token 추출
+        String authHeader = request.getHeader("Authorization");
+        if(authHeader == null || !authHeader.startsWith("Bearer")){
+            throw new ExceptionResponse(401, "존재하지 않는 TOKEN", "INVALID_TOKEN");
+        }
+
+        BookDetailAdmin_DTO bookDto = adminService.bookView(isbn);
+
+        return ResponseEntity.ok(new ApiResponse(200, "도서 상세 조회 성공", bookDto));
+    }
+
 
     @Data
     static class CreateBookRequest {

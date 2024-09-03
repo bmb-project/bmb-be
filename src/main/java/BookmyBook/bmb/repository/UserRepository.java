@@ -30,4 +30,12 @@ public class UserRepository {
                 .setParameter("nickname", nickname)
                 .getResultList();
     }
+
+
+    public User findByUserIDKim(String UserId){
+        return em.createQuery("select u from User u where u.user_id = :UserId", User.class)
+                .setParameter("UserId", UserId)
+                .getSingleResult();
+    }
+
 }
