@@ -18,9 +18,11 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 @Controller
 @RequiredArgsConstructor
@@ -66,47 +68,81 @@ public class AdminApiController {
 
     @PostMapping("admin/books") // 도서 추가
     @PreAuthorize("hasRole('Admin')")
-    public ResponseEntity<?> insertBook(@RequestBody CreateBookRequest request){
+    public ResponseEntity<?> insertBook(@ModelAttribute CreateBookRequest request) {
 
-        if(request.isbn.length() != 13) {
-            throw new ExceptionResponse(400, "잘못된 ISBN", "INVALID_ISBN_ADMIN");
+        log.info("파일 이름 : {}", request.getThumbnail().toString());
+        if (request.isbn.length() != 13) {
+            throw new ExceptionResponse(400, "잘못된 ISBN", "INVALID_ISBN");
         }
-        adminService.youHere(request.isbn);
+
+        long now = LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant().getEpochSecond();
+        long pu_da = request.published_date.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant().getEpochSecond();
+
+        if(pu_da > now){
+            throw new ExceptionResponse(400, "날짜가 유효하지 않습니다", "INVALID_PUBLISHED_DATE");
+        }
+
+        adminService.youHere(request.getIsbn());
+
+        // 파일크기 제한을 걸기는 했는데, yml파일 선에서 알아서 컷 해주는 겉 같습니다. 이 조건문이 쓰이진 않아요.
+        if(request.getThumbnail().getSize() > 1024 * 1024 * 5){
+            throw new ExceptionResponse(407, "파일 크기 제한 5MB", "TOO_BIG_FILE_SIZE");
+        }else{
+            // 길면 보기 안 좋으니 fileType로 줄임.
+            String fileType = request.getThumbnail().getContentType();
+            log.info(fileType);
+            if(fileType.equalsIgnoreCase("image/png") ||
+                    fileType.equalsIgnoreCase("image/jpg") ||
+                    fileType.equalsIgnoreCase("image/jpeg")){
+
+            }else{
+                throw new ExceptionResponse(400, "파일 형식에 맞지 않습니다", "INVALID_FILE_FORMAT");
+            }
+        }
 
         try {
             Book book = new Book();
-            book.setIsbn(request.isbn);
-            book.setTitle(request.title);
-            book.setAuthor_name(request.author_name);
-            book.setPublisher_name(request.publisher_name);
-            book.setThumbnail(request.thumbnail);
-            book.setDescription(request.description);
-            book.setPublished_date(request.published_date);
+            book.setIsbn(request.getIsbn());
+            book.setTitle(request.getTitle());
+            book.setAuthor_name(request.getAuthor_name());
+            book.setPublisher_name(request.getPublisher_name());
+            book.setDescription(request.getDescription());
+            book.setPublished_date(request.getPublished_date());
             book.setCreated_at(LocalDateTime.now());
-            log.info("asdf : {}", request.available);
 
-            if(request.available){
+            // 썸네일 이미지 파일 처리
+//            MultipartFile thumbnailFile = request.getThumbnail();
+//            if (thumbnailFile != null && !thumbnailFile.isEmpty()) {
+//                // 파일을 서버에 저장하고, 파일 경로 또는 URL을 데이터베이스에 저장
+//                String fileName = UUID.randomUUID().toString() + "_" + thumbnailFile.getOriginalFilename();
+//                //Path path = Paths.get("src/main/resources/static/img/" + fileName);
+//                Path path = Paths.get("아무튼 파일 경로/" + fileName);
+//                Files.copy(thumbnailFile.getInputStream(), path);
+//
+//                book.setThumbnail(fileName);  // 저장된 파일의 경로 또는 URL을 설정
+//            }
+
+            if (request.isAvailable()) {
                 book.setStatus(BookStatus.AVAILABLE);
-            }else {
+            } else {
                 throw new ExceptionResponse(401, "available의 값이 true가 아닙니다.", "AVAILABLE_IS_NOT_TRUE");
             }
 
             boolean insert = adminService.insert(book);
 
-            if(insert){
+            if (insert) {
                 BookDetail_DTO bookDto = new BookDetail_DTO(book.getIsbn(), book.getTitle(),
                         book.getDescription(), book.getThumbnail(), book.getAuthor_name(),
                         book.getPublisher_name(), book.getPublished_date(), book.getCreated_at(), book.getStatus());
 
                 return ResponseEntity.ok(new ApiResponse(201, "도서 등록 성공", bookDto));
-            }else {
-                return ResponseEntity.ok(new ApiResponse(404, "도서 등록 실패", ""));
+            } else {
+                return ResponseEntity.ok(new ApiResponseNoResult(404, "도서 등록 실패"));
             }
 
-        }catch (Exception e){
+        } catch (Exception e) {
             throw new ExceptionResponse(410, "처리 과정 중 예외 발생", "EXCEPTION_ADMIN");
         }
-
 
     }
 
@@ -173,7 +209,7 @@ public class AdminApiController {
         private String title;
         private String author_name;
         private String publisher_name;
-        private String thumbnail;
+        private MultipartFile thumbnail;
         private String description;
         private LocalDate published_date;
         private LocalDateTime created_at;
