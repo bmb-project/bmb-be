@@ -12,6 +12,7 @@ import BookmyBook.bmb.response.dto.AdminBookDto;
 import BookmyBook.bmb.response.dto.AdminLoanDto;
 import BookmyBook.bmb.response.dto.BookDetail_DTO;
 import BookmyBook.bmb.security.JwtUtil;
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -31,6 +32,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class AdminService {
 
+    private final EntityManager entityManager;
     private final BookRepository bookRepository;
     private final WishRepository wishRepository;
     private final LoanRepository loanRepository;
@@ -119,7 +121,6 @@ public class AdminService {
     @Transactional
     public boolean insert(Book book) {
         log.info("adminService - insert Start & End");
-        String isbn = book.getIsbn();
 
         Book b2 = bookRepository.save(book);
         if(b2.getId() == null){
@@ -141,7 +142,12 @@ public class AdminService {
         if(book == null){
             throw new ExceptionResponse(404, "해당 도서 없음", "NOT_FOUND_BOOK");
         }
-        bookRepository.deleteByIsbn(isbn);
+        boolean tf = loanRepository.existsByIsbnAndReturnAtIsNull(isbn);
+        if(tf){
+            throw new ExceptionResponse(500, "도서 삭제 실패 - 대여 중인 도서 삭제 시도", "NOT_EXIST_BOOK_ADMIN");
+        }
+        bookRepository.deleteByIsbn(book.getIsbn());
+        entityManager.flush();
         log.info("삭제 완료.");
     }
 

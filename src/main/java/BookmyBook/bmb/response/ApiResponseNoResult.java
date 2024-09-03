@@ -3,17 +3,16 @@ package BookmyBook.bmb.response;
 import lombok.Getter;
 import lombok.Setter;
 
-@Getter @Setter
-public class ApiResponse {
+@Getter
+@Setter
+public class ApiResponseNoResult {
 
     private int statusCode;
     private String message;
-    private Object result;
 
-    public ApiResponse(int statusCode, String message, Object result) {
+    public ApiResponseNoResult(int statusCode, String message) {
         this.statusCode = statusCode;
         this.message = message;
-        this.result = result;
     }
 
 }
