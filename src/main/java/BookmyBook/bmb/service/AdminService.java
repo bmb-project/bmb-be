@@ -206,7 +206,7 @@ public class AdminService {
         List<AdminLoanDto> dtos = al;
 
         BookDetailAdmin_DTO dto = new BookDetailAdmin_DTO(book.getIsbn(), book.getTitle(), book.getThumbnail(),
-                book.getAuthor_name(), book.getPublisher_name(),
+                book.getAuthor_name(), book.getPublisher_name(), book.getPublished_date(),
                 book.getStatus(), dtos);
 
         return dto;
