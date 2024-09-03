@@ -1,15 +1,15 @@
 package BookmyBook.bmb.service;
 
-import BookmyBook.bmb.domain.Book;
-import BookmyBook.bmb.domain.BookSpecification;
-import BookmyBook.bmb.domain.Loan;
+import BookmyBook.bmb.domain.*;
 import BookmyBook.bmb.repository.BookRepository;
 import BookmyBook.bmb.repository.LoanRepository;
+import BookmyBook.bmb.repository.UserRepository;
 import BookmyBook.bmb.repository.WishRepository;
 import BookmyBook.bmb.response.AdminBookResponse;
 import BookmyBook.bmb.response.ExceptionResponse;
 import BookmyBook.bmb.response.dto.AdminBookDto;
 import BookmyBook.bmb.response.dto.AdminLoanDto;
+import BookmyBook.bmb.response.dto.BookDetailAdmin_DTO;
 import BookmyBook.bmb.response.dto.BookDetail_DTO;
 import BookmyBook.bmb.security.JwtUtil;
 import jakarta.persistence.EntityManager;
@@ -36,6 +36,7 @@ public class AdminService {
     private final BookRepository bookRepository;
     private final WishRepository wishRepository;
     private final LoanRepository loanRepository;
+    private final UserRepository userRepository;
     private final UserService userService;
     private final LoanService loanService;
     private final JwtUtil jwtUtil;
@@ -170,6 +171,34 @@ public class AdminService {
         if(book != null){
             throw new ExceptionResponse(404, "해당 도서가 이미 존재함", "ALREADY_EXIST_BOOK_ADMIN");
         }
+    }
+
+    //도서 한 권 상세정보
+    public BookDetailAdmin_DTO bookView(String isbn){
+
+        Book book = bookRepository.findByIsbn(isbn);
+        if(book == null){
+            throw new ExceptionResponse(404, "해당 도서 없음", "NOT_FOUND_BOOK");
+        }
+
+        List<Loan> ABLO = loanRepository.findByIsbn(isbn);
+
+        List<AdminLoanDto> dtos = null;
+
+        for(Loan loann : ABLO){
+            User user = userRepository.findByUserIDKim(loann.getUserId());
+
+            AdminLoanDto ald = new AdminLoanDto(loann.getId(), user.getNickname(), loann.getUserId(),
+                                                loann.getLoan_at(), loann.getReturnAt());
+
+            dtos.add(ald);
+        }
+
+        BookDetailAdmin_DTO dto = new BookDetailAdmin_DTO(book.getIsbn(), book.getTitle(), book.getThumbnail(),
+                book.getAuthor_name(), book.getPublisher_name(),
+                book.getStatus(), dtos);
+
+        return dto;
     }
 
 }
