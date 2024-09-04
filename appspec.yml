@@ -2,7 +2,7 @@ version: 0.0
 os: linux
 
 files:
-  - source:  /
+  - source: /build/libs
     destination: /home/ubuntu/spring-github-action
     overwrite: yes
 
