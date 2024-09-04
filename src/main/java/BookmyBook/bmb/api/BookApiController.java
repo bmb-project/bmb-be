@@ -119,7 +119,8 @@ public class BookApiController {
         return ResponseEntity.ok(new ApiResponse(200, "좋아요 취소 성공", wishDto));
     }
 
-    @PostMapping("/books/insert") // 도서 추가
+    // 도서 추가
+    @PostMapping("/books/insert")
     @PreAuthorize("hasRole('Admin')")
     public ResponseEntity<?> insertBook(@RequestBody CreateBookRequest request){
         Book book = new Book();
@@ -134,12 +135,10 @@ public class BookApiController {
         book.setCreated_at(LocalDateTime.now());
         book.setStatus(request.status);
 
-        log.info("Request: {}", request);
-        log.info("CreatedTime : {}", book.getCreated_at());
         Book insert = bookService.insert(book);
-        BookDetail_DTO bookDto = new BookDetail_DTO(book.getIsbn(), book.getTitle(),
-                book.getDescription(), book.getThumbnail(), book.getAuthor_name(),
-                book.getPublisher_name(), book.getPublished_date(), book.getCreated_at(), book.getStatus());
+        BookDetail_DTO bookDto = new BookDetail_DTO(insert.getIsbn(), insert.getTitle(),
+                insert.getDescription(), insert.getThumbnail(), insert.getAuthor_name(),
+                insert.getPublisher_name(), insert.getPublished_date(), insert.getCreated_at(), insert.getStatus());
 
         return ResponseEntity.ok(new ApiResponse(200, "도서 추가 성공", bookDto));
     }
@@ -149,9 +148,6 @@ public class BookApiController {
     @GetMapping("/books/{isbn}")
     @PreAuthorize("hasRole('User') or hasRole('Admin')")
     public ResponseEntity<?> viewBook(@PathVariable("isbn") String isbn, HttpServletRequest request) {
-        log.info(isbn);
-        log.info("/books/??? Start : " + isbn);
-        BookDetail_DTO bookDto = null;
 
         //Authorization header에서 token 추출
         String authHeader = request.getHeader("Authorization");
@@ -159,20 +155,12 @@ public class BookApiController {
             throw new ExceptionResponse(401, "존재하지 않는 TOKEN", "INVALID_TOKEN");
         }
         String accessToken = authHeader.substring(7); //Bearer 제거
-        log.info("Token : {}", accessToken);
 
         // 도서 존재 확인
-        boolean tf = bookService.bookKakuninn(isbn);
+        bookService.bookKakuninn(isbn);
 
         // 확인 후 도서 가져오기
-        if(tf){
-            bookDto = bookService.bookView(isbn, accessToken);
-
-        }else{
-            // 도서가 존재하지 않을 경우 처리
-            log.info("도서 ISBN : {}에 해당하는 도서를 찾을 수 없습니다.", isbn);
-            throw new ExceptionResponse(404, "해당 isbn 책 없음", "NOT_FOUNDED_ISBN");
-        }
+        BookDetail_DTO bookDto = bookService.bookView(isbn, accessToken);
 
         return ResponseEntity.ok(new ApiResponse(200, "도서 상세 조회 성공", bookDto));
     }

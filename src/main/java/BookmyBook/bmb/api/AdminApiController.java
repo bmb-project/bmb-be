@@ -70,15 +70,14 @@ public class AdminApiController {
     @PreAuthorize("hasRole('Admin')")
     public ResponseEntity<?> insertBook(@ModelAttribute CreateBookRequest request) {
 
-        log.info("파일 이름 : {}", request.getThumbnail().toString());
         if (request.isbn.length() != 13) {
             throw new ExceptionResponse(400, "잘못된 ISBN", "INVALID_ISBN");
         }
 
         long now = LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant().getEpochSecond();
-        long pu_da = request.published_date.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant().getEpochSecond();
+        long publish_date = request.published_date.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant().getEpochSecond();
 
-        if(pu_da > now){
+        if(publish_date > now){
             throw new ExceptionResponse(400, "날짜가 유효하지 않습니다", "INVALID_PUBLISHED_DATE");
         }
 
@@ -90,7 +89,6 @@ public class AdminApiController {
         }else{
             // 길면 보기 안 좋으니 fileType로 줄임.
             String fileType = request.getThumbnail().getContentType();
-            log.info(fileType);
             if(fileType.equalsIgnoreCase("image/png") ||
                     fileType.equalsIgnoreCase("image/jpg") ||
                     fileType.equalsIgnoreCase("image/jpeg")){
@@ -152,34 +150,17 @@ public class AdminApiController {
         if(isbn.length() != 13){
             throw new ExceptionResponse(404, "해당 isbn 책 없음", "NOT_FOUNDED_ISBN");
         }
-        log.info("/books Start : {}", isbn);
 
         // 도서 가져오기
         BookDetail_DTO bookDto = adminService.bring(isbn);
 
         // 도서가 존재하지 않을 경우 처리
-        if (bookDto == null) {
-            log.info("도서 ID {}에 해당하는 도서를 찾을 수 없습니다.", isbn);
-            throw new ExceptionResponse(404, "해당 isbn 책 없음", "NOT_FOUNDED_ISBN");
-        }else if(bookDto.getStatus() != BookStatus.AVAILABLE){
-            log.info("선택한 도서는 대여 중인 도서이므로 삭제할 수 없습니다.");
+        if (bookDto.getStatus() != BookStatus.AVAILABLE) {
             throw new ExceptionResponse(409, "대여 목록이 있어 삭제할 수 없습니다", "BOOK_HAS_LOANS");
         }
 
-        log.info("ISBN : {}", bookDto.getIsbn());
-        log.info("Title : {}", bookDto.getTitle());
-        log.info("Author name : {}", bookDto.getAuthor_name());
-        log.info("Publisher name : {}", bookDto.getPublisher_name());
-        log.info("Thumbnail : {}", bookDto.getThumbnail());
-        log.info("Description : {}", bookDto.getDescription());
-        log.info("Published_date : {}", bookDto.getPublished_date());
-        log.info("Created at : {}", bookDto.getCreated_at());
-        log.info("Status : {}", bookDto.getStatus());
-
-        log.info("Delete Start");
         adminService.delete(bookDto.getIsbn());
 
-        log.info("Delete Over");
         return ResponseEntity.ok(new ApiResponseNoResult(200, "도서 삭제 성공"));
     }
 
@@ -188,7 +169,6 @@ public class AdminApiController {
     @GetMapping("admin/books/{isbn}")
     @PreAuthorize("hasRole('Admin')")
     public ResponseEntity<?> adminViewBook(@PathVariable("isbn") String isbn, HttpServletRequest request){
-        log.info("Start adminViewBook() | ISBN : {}", isbn);
 
         //Authorization header에서 token 추출
         String authHeader = request.getHeader("Authorization");
