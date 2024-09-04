@@ -39,7 +39,8 @@ public class JwtFilter extends OncePerRequestFilter {
         //Authorization header에서 token 추출
         String authHeader = request.getHeader("Authorization");
         if(authHeader == null || !authHeader.startsWith("Bearer")){
-            throw new ExceptionResponse(401, "존재하지 않는 TOKEN", "INVALID_TOKEN");
+            setErrorResponse(response,"INVALID_TOKEN", "존재하지 않는 token");
+            return;
         }
         String accessToken = authHeader.substring(7); //Bearer 제거
 
@@ -63,7 +64,8 @@ public class JwtFilter extends OncePerRequestFilter {
                 return;
             }
         } catch (Exception e) {
-            setErrorResponse(response, "AUTHENTICATION_ERROR", "권한 없음");
+            //토큰 유효 시간 만료 or null
+            setErrorResponse(response, "INVALID_ACCESS_TOKEN", "유효하지 않은 access token");
             return;
         }
         filterChain.doFilter(request, response); // 필터 체인을 계속 진행
@@ -88,12 +90,13 @@ public class JwtFilter extends OncePerRequestFilter {
     }
 
     private void setErrorResponse(HttpServletResponse response, String code, String message) throws IOException {
-        response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+        //response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
 
         PrintWriter writer = response.getWriter();
-        writer.write("{\"status\":\""+ HttpServletResponse.SC_FORBIDDEN +"\"\n\t\"error\": \"" + code + "\"\n\t\"message\":\""+message+"\"}");
+        writer.write("{\"status\":\"" + HttpServletResponse.SC_UNAUTHORIZED + "\", \"error\": \"" + code + "\", \"message\":\"" + message + "\"}");
         writer.flush();
     }
 }
