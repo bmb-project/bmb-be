@@ -182,7 +182,6 @@ public class BookService {
     //도서 추가
     @Transactional
     public Book insert(Book book) {
-        log.info("bookService - insert Start & End");
         return bookRepository.save(book);
     }
 
@@ -196,50 +195,33 @@ public class BookService {
         String user_id = jwtUtil.getUserId(token, "access");
 
         Loan loan = loanRepository.findByIsbnAndReturnAtIsNullAndUserId(isbn, user_id);
-        boolean b = loanRepository.existsByIsbnAndReturnAtIsNull(isbn);
-        BookStatus bs = BookStatus.UNAVAILABLE;
-        if(!b){
-            bs = BookStatus.AVAILABLE;
+        boolean isExistInList = loanRepository.existsByIsbnAndReturnAtIsNull(isbn);
+        BookStatus bookSt = BookStatus.UNAVAILABLE;
+        if(!isExistInList){
+            bookSt = BookStatus.AVAILABLE;
         }
         if(loan != null){
-            bs = BookStatus.CHECKED_OUT;
+            bookSt = BookStatus.CHECKED_OUT;
         }
 
         BookDetail_DTO dto = new BookDetail_DTO(book.getIsbn(), book.getTitle(),
                 book.getDescription(), book.getThumbnail(), book.getAuthor_name(),
-                book.getPublisher_name(), book.getPublished_date(), book.getCreated_at(), bs);
+                book.getPublisher_name(), book.getPublished_date(), book.getCreated_at(), bookSt);
         // Optional의 값이 존재하는 경우 DTO로 변환, 없으면 null 반환
         return dto;
     }
 
     // 도서 존재 확인
-    public boolean bookKakuninn(String isbn){
-        log.info("bookKakuninn Start! : " + isbn);
+    public void bookKakuninn(String isbn){
         Book book = bookRepository.findByIsbn(isbn);
 
         // 13자리가 아니면 컷
         if(isbn.length() != 13){
             throw new ExceptionResponse(404, "잘못된 ISBN", "INVALID_ISBN");
         }else if(book == null){
-            throw new ExceptionResponse(404, "해당 도서 없음", "NOT_FOUND_BOOK");
+            throw new ExceptionResponse(404, "해당 isbn 책 없음", "NOT_FOUNDED_ISBN");
         }
-        log.info("findByIsbn부터 isbn 확인 과정까지 이상 무.");
-        if(book.getId() != null){
-            log.info("해당 도서가 존재합니다.");
-            return true;
-        }else{
-            log.info("해당 도서가 존재하지 않습니다.");
-            return false;
-        }
-    }
 
-    // ID로 도서 가져오기 dto
-//    public SeonwooBook_DTO bookBringId(long id){
-//        Optional<Book> book = bookRepository.findById(id);
-//        SeonwooBook_DTO dto = new SeonwooBook_DTO(book.get().getIsbn(), book.get().getId(), book.get().getTitle(), book.get().getThumbnail(),
-//                book.get().getAuthor_name(), book.get().getPublisher_name(), book.get().getStatus(), book.get().getDescription(),
-//                book.get().getPublished_date(), book.get().getCreated_at());
-//        return dto;
-//    }
+    }
 
 }

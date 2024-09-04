@@ -122,7 +122,6 @@ public class AdminService {
     //도서 추가
     @Transactional
     public boolean insert(Book book) {
-        log.info("adminService - insert Start & End");
         if(bookRepository.findByIsbn(book.getIsbn()) != null){
             throw new ExceptionResponse(409, "동일한 ISBN의 도서가 존재합니다", "BOOK_ALREADY_INSERT");
         }
@@ -133,46 +132,39 @@ public class AdminService {
 
         // 원래는 Thumbnail에 이미지가 저장된 주소가 들어가지만, 지금은 일단 '어디론가의 위치'로 통일.
         book.setThumbnail("어디론가의 위치");
-        Book b2 = bookRepository.save(book);
+        Book amISaved = bookRepository.save(book);
 
-        if(b2.getId() == null){
-            log.info("도서 등록 실패");
+        if(amISaved.getId() == null){
             return false;
-        }else{
-            log.info("도서 등록 성공");
-            return true;
         }
 
+        return true;
     }
 
     //도서 삭제
     @Transactional
     public void delete(String isbn){
-        log.info("qwer");
         Book book = bookRepository.findByIsbn(isbn);
-        log.info("asdf");
         if(book == null){
-            throw new ExceptionResponse(404, "해당 도서 없음", "NOT_FOUND_BOOK");
+            throw new ExceptionResponse(404, "해당 isbn 책 없음", "NOT_FOUNDED_ISBN");
         }
         boolean tf = loanRepository.existsByIsbnAndReturnAtIsNull(isbn);
         if(tf){
-            throw new ExceptionResponse(500, "도서 삭제 실패 - 대여 중인 도서 삭제 시도", "NOT_EXIST_BOOK_ADMIN");
+            throw new ExceptionResponse(409, "대여 목록이 있어 삭제할 수 없습니다", "BOOK_HAS_LOANS");
         }
         bookRepository.deleteByIsbn(book.getIsbn());
         entityManager.flush();
-        log.info("삭제 완료.");
     }
 
     //도서 겟또
     public BookDetail_DTO bring(String isbn){
         Book book = bookRepository.findByIsbn(isbn);
         if(book == null){
-            throw new ExceptionResponse(404, "해당 도서 없음", "NOT_FOUND_BOOK");
+            throw new ExceptionResponse(404, "해당 isbn 책 없음", "NOT_FOUNDED_ISBN");
         }
         BookDetail_DTO dto = new BookDetail_DTO(book.getIsbn(), book.getTitle(),
                 book.getDescription(), book.getThumbnail(), book.getAuthor_name(),
                 book.getPublisher_name(), book.getPublished_date(), book.getCreated_at(), book.getStatus());
-        log.info("겟또 완료.");
         return dto;
     }
 
@@ -180,7 +172,7 @@ public class AdminService {
     public void youHere(String isbn){
         Book book = bookRepository.findByIsbn(isbn);
         if(book != null){
-            throw new ExceptionResponse(404, "해당 도서가 이미 존재함", "ALREADY_EXIST_BOOK_ADMIN");
+            throw new ExceptionResponse(409, "동일한 ISBN의 도서가 존재합니다", "BOOK_ALREADY_INSERT");
         }
     }
 
@@ -189,25 +181,23 @@ public class AdminService {
 
         Book book = bookRepository.findByIsbn(isbn);
         if(book == null){
-            throw new ExceptionResponse(404, "해당 도서 없음", "NOT_FOUND_BOOK");
+            throw new ExceptionResponse(404, "해당 isbn 책 없음", "NOT_FOUNDED_ISBN");
         }
 
-        List<Loan> ABLO = loanRepository.findByIsbn(isbn);
+        List<Loan> rentList = loanRepository.findByIsbn(isbn);
 
-        ArrayList<AdminLoanDto> al = new ArrayList<AdminLoanDto>();
+        ArrayList<AdminLoanDto> al_adminLoanDTO = new ArrayList<>();
 
-        for(Loan loann : ABLO){
+        for(Loan loann : rentList){
             User user = userRepository.findByUserIDKim(loann.getUserId());
             AdminLoanDto ald = new AdminLoanDto(loann.getId(), user.getNickname(), loann.getUserId(),
                                                 loann.getLoan_at(), loann.getReturnAt());
-            al.add(ald);
+            al_adminLoanDTO.add(ald);
         }
-
-        List<AdminLoanDto> dtos = al;
 
         BookDetailAdmin_DTO dto = new BookDetailAdmin_DTO(book.getIsbn(), book.getTitle(), book.getThumbnail(),
                 book.getAuthor_name(), book.getPublisher_name(), book.getPublished_date(),
-                book.getStatus(), dtos);
+                book.getStatus(), al_adminLoanDTO);
 
         return dto;
     }
