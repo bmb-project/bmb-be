@@ -10,6 +10,8 @@ env:
   AWS_S3_BUCKET: bmb-project-bucket
   AWS_CODE_DEPLOY_APPLICATION: bmb-codedeploy
   AWS_CODE_DEPLOY_GROUP: bmb-codedeploy-group
+  JWT_SECRET: ${{ secrets.JWT_SECRET }}
+  JWT_REFRESH_SECRET: ${{ secrets.JWT_REFRESH_SECRET }}
 
 jobs:
   build-with-gradle:
