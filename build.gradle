@@ -32,10 +32,12 @@ dependencies {
 	implementation 'com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.9.0'
 	implementation 'io.jsonwebtoken:jjwt:0.9.1'
 	implementation 'org.springframework.boot:spring-boot-starter-security'
-	implementation 'javax.servlet:javax.servlet-api:4.0.1' // 최신 버전을 사용할 수 있습니다
+	implementation 'javax.servlet:javax.servlet-api:4.0.1'
 	implementation 'javax.xml.bind:jaxb-api:2.3.1'
 	implementation 'org.glassfish.jaxb:jaxb-runtime:2.3.1'
 	implementation 'org.mariadb.jdbc:mariadb-java-client:3.1.0'
+	implementation 'software.amazon.awssdk:s3:2.20.45' //s3 이미지 업로드
+	implementation 'com.amazonaws:aws-java-sdk-s3:1.12.431' //s3 이미지 업로드
 	compileOnly 'org.projectlombok:lombok'
 	runtimeOnly 'com.h2database:h2'
 	annotationProcessor 'org.projectlombok:lombok'
