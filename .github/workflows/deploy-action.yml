@@ -26,6 +26,12 @@ jobs:
       with:
         java-version: '21'
         distribution: 'corretto'
+        
+    - uses: actions/checkout@v3
+    - run: touch ./src/main/resources/env.yml
+    - run: echo "${{ secrets.ENV_YML}}" > ./src/main/resources/env.yml
+    - run: cat ./src/main/resources/env.yml 
+    
     - name: gradlew에 실행 권한 부여
       run: chmod +x ./gradlew
     - name: 프로젝트 빌드
