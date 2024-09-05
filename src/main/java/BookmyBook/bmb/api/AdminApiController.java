@@ -10,6 +10,7 @@ import BookmyBook.bmb.response.dto.BookDetailAdmin_DTO;
 import BookmyBook.bmb.response.dto.BookDetail_DTO;
 import BookmyBook.bmb.security.JwtUtil;
 import BookmyBook.bmb.service.AdminService;
+import BookmyBook.bmb.service.S3Service;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +31,7 @@ import java.time.ZoneId;
 public class AdminApiController {
 
     private final AdminService adminService;
+    private final S3Service s3Service;
     private final JwtUtil jwtUtil;
 
     //admin 도서 목록
@@ -68,7 +70,7 @@ public class AdminApiController {
 
     @PostMapping("admin/books") // 도서 추가
     @PreAuthorize("hasRole('Admin')")
-    public ResponseEntity<?> insertBook(@ModelAttribute CreateBookRequest request) {
+    public ResponseEntity<?> insertBook(@ModelAttribute CreateBookRequest request) throws Exception {
 
         if (request.isbn.length() != 13) {
             throw new ExceptionResponse(400, "잘못된 ISBN", "INVALID_ISBN");
@@ -99,12 +101,16 @@ public class AdminApiController {
         }
 
         try {
+            // Thumbnail 업로드 및 URL 반환
+            String thumbnailUrl = s3Service.uploadFile(request.getThumbnail());
+
             Book book = new Book();
             book.setIsbn(request.getIsbn());
             book.setTitle(request.getTitle());
             book.setAuthor_name(request.getAuthor_name());
             book.setPublisher_name(request.getPublisher_name());
             book.setDescription(request.getDescription());
+            book.setThumbnail(thumbnailUrl);
             book.setPublished_date(request.getPublished_date());
             book.setCreated_at(LocalDateTime.now());
 
@@ -164,7 +170,6 @@ public class AdminApiController {
         return ResponseEntity.ok(new ApiResponseNoResult(200, "도서 삭제 성공"));
     }
 
-
     // Admin 조회
     @GetMapping("admin/books/{isbn}")
     @PreAuthorize("hasRole('Admin')")
@@ -180,7 +185,6 @@ public class AdminApiController {
 
         return ResponseEntity.ok(new ApiResponse(200, "도서 상세 조회 성공", bookDto));
     }
-
 
     @Data
     static class CreateBookRequest {

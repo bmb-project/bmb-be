@@ -130,8 +130,6 @@ public class AdminService {
             throw new ExceptionResponse(400, "소개글은 1000자 이하로 입력 가능합니다", "INVALID_DESCRIPTION");
         }
 
-        // 원래는 Thumbnail에 이미지가 저장된 주소가 들어가지만, 지금은 일단 '어디론가의 위치'로 통일.
-        book.setThumbnail("어디론가의 위치");
         Book amISaved = bookRepository.save(book);
 
         if(amISaved.getId() == null){
