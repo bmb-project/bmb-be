@@ -82,21 +82,6 @@ public class AdminApiController {
             throw new ExceptionResponse(400, "오늘 포함 이전만 입력 가능합니다", "INVALID_PUBLISHED_DATE");
         }
 
-        // 파일크기 제한을 걸기는 했는데, yml파일 선에서 알아서 컷 해주는 겉 같습니다. 이 조건문이 쓰이진 않아요.
-        if(request.getThumbnail().getSize() > 1024 * 1024 * 5){
-            throw new ExceptionResponse(407, "파일 크기 제한 5MB", "TOO_BIG_FILE_SIZE");
-        }else{
-            // 길면 보기 안 좋으니 fileType로 줄임.
-            String fileType = request.getThumbnail().getContentType();
-            if(fileType.equalsIgnoreCase("image/png") ||
-                    fileType.equalsIgnoreCase("image/jpg") ||
-                    fileType.equalsIgnoreCase("image/jpeg")){
-
-            }else{
-                throw new ExceptionResponse(400, "파일 형식에 맞지 않습니다", "INVALID_FILE_FORMAT");
-            }
-        }
-
         try {
             // Thumbnail 업로드 및 URL 반환
             String thumbnailUrl = s3Service.uploadFile(request.getThumbnail());
@@ -110,18 +95,6 @@ public class AdminApiController {
             book.setThumbnail(thumbnailUrl);
             book.setPublished_date(request.getPublished_date());
             book.setCreated_at(LocalDateTime.now());
-
-            // 썸네일 이미지 파일 처리
-//            MultipartFile thumbnailFile = request.getThumbnail();
-//            if (thumbnailFile != null && !thumbnailFile.isEmpty()) {
-//                // 파일을 서버에 저장하고, 파일 경로 또는 URL을 데이터베이스에 저장
-//                String fileName = UUID.randomUUID().toString() + "_" + thumbnailFile.getOriginalFilename();
-//                //Path path = Paths.get("src/main/resources/static/img/" + fileName);
-//                Path path = Paths.get("아무튼 파일 경로/" + fileName);
-//                Files.copy(thumbnailFile.getInputStream(), path);
-//
-//                book.setThumbnail(fileName);  // 저장된 파일의 경로 또는 URL을 설정
-//            }
 
             boolean insert = adminService.insert(book);
 

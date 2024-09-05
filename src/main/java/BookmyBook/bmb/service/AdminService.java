@@ -132,11 +132,7 @@ public class AdminService {
 
         Book amISaved = bookRepository.save(book);
 
-        if(amISaved.getId() == null){
-            return false;
-        }
-
-        return true;
+        return amISaved.getId() != null;
     }
 
     //도서 삭제
@@ -162,10 +158,9 @@ public class AdminService {
         if(book == null){
             throw new ExceptionResponse(404, "해당 isbn 책 없음", "NOT_FOUNDED_ISBN");
         }
-        BookDetail_DTO dto = new BookDetail_DTO(book.getIsbn(), book.getTitle(),
+        return new BookDetail_DTO(book.getIsbn(), book.getTitle(),
                 book.getDescription(), book.getThumbnail(), book.getAuthor_name(),
                 book.getPublisher_name(), book.getPublished_date(), book.getCreated_at(), book.getStatus());
-        return dto;
     }
 
     //도서 한 권 상세정보
@@ -187,11 +182,9 @@ public class AdminService {
             al_adminLoanDTO.add(ald);
         }
 
-        BookDetailAdmin_DTO dto = new BookDetailAdmin_DTO(book.getIsbn(), book.getTitle(), book.getThumbnail(),
+        return new BookDetailAdmin_DTO(book.getIsbn(), book.getTitle(), book.getThumbnail(),
                 book.getAuthor_name(), book.getPublisher_name(), book.getPublished_date(),
                 book.getStatus(), al_adminLoanDTO);
-
-        return dto;
     }
 
 }
