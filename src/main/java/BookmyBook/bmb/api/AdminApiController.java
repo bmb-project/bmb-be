@@ -1,7 +1,6 @@
 package BookmyBook.bmb.api;
 
 import BookmyBook.bmb.domain.Book;
-import BookmyBook.bmb.domain.BookStatus;
 import BookmyBook.bmb.response.AdminBookResponse;
 import BookmyBook.bmb.response.ApiResponse;
 import BookmyBook.bmb.response.ApiResponseNoResult;
@@ -80,10 +79,8 @@ public class AdminApiController {
         long publish_date = request.published_date.atStartOfDay().atZone(ZoneId.systemDefault()).toInstant().getEpochSecond();
 
         if(publish_date > now){
-            throw new ExceptionResponse(400, "날짜가 유효하지 않습니다", "INVALID_PUBLISHED_DATE");
+            throw new ExceptionResponse(400, "오늘 포함 이전만 입력 가능합니다", "INVALID_PUBLISHED_DATE");
         }
-
-        adminService.youHere(request.getIsbn());
 
         // 파일크기 제한을 걸기는 했는데, yml파일 선에서 알아서 컷 해주는 겉 같습니다. 이 조건문이 쓰이진 않아요.
         if(request.getThumbnail().getSize() > 1024 * 1024 * 5){
@@ -126,12 +123,6 @@ public class AdminApiController {
 //                book.setThumbnail(fileName);  // 저장된 파일의 경로 또는 URL을 설정
 //            }
 
-            if (request.isAvailable()) {
-                book.setStatus(BookStatus.AVAILABLE);
-            } else {
-                throw new ExceptionResponse(401, "available의 값이 true가 아닙니다.", "AVAILABLE_IS_NOT_TRUE");
-            }
-
             boolean insert = adminService.insert(book);
 
             if (insert) {
@@ -152,19 +143,16 @@ public class AdminApiController {
 
     @DeleteMapping("/books/{isbn}") // ID로 한 권 선택 삭제
     @PreAuthorize("hasRole('Admin')")
-    public ResponseEntity<?> viewDelete(@PathVariable("isbn") String isbn){
-        if(isbn.length() != 13){
+    public ResponseEntity<?> viewDelete(@PathVariable("isbn") String isbn) {
+
+        if (isbn.length() != 13) {
             throw new ExceptionResponse(404, "해당 isbn 책 없음", "NOT_FOUNDED_ISBN");
         }
 
         // 도서 가져오기
         BookDetail_DTO bookDto = adminService.bring(isbn);
 
-        // 도서가 존재하지 않을 경우 처리
-        if (bookDto.getStatus() != BookStatus.AVAILABLE) {
-            throw new ExceptionResponse(409, "대여 목록이 있어 삭제할 수 없습니다", "BOOK_HAS_LOANS");
-        }
-
+        // 도서 삭제
         adminService.delete(bookDto.getIsbn());
 
         return ResponseEntity.ok(new ApiResponseNoResult(200, "도서 삭제 성공"));

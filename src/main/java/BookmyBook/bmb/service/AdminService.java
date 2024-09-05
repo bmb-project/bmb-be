@@ -146,6 +146,8 @@ public class AdminService {
         if(book == null){
             throw new ExceptionResponse(404, "해당 isbn 책 없음", "NOT_FOUNDED_ISBN");
         }
+
+        // 도서가 대여 중일 경우 삭제불가
         boolean tf = loanRepository.existsByIsbnAndReturnAtIsNull(isbn);
         if(tf){
             throw new ExceptionResponse(409, "대여 목록이 있어 삭제할 수 없습니다", "BOOK_HAS_LOANS");
@@ -164,14 +166,6 @@ public class AdminService {
                 book.getDescription(), book.getThumbnail(), book.getAuthor_name(),
                 book.getPublisher_name(), book.getPublished_date(), book.getCreated_at(), book.getStatus());
         return dto;
-    }
-
-    // 도서 존재 확인
-    public void youHere(String isbn){
-        Book book = bookRepository.findByIsbn(isbn);
-        if(book != null){
-            throw new ExceptionResponse(409, "동일한 ISBN의 도서가 존재합니다", "BOOK_ALREADY_INSERT");
-        }
     }
 
     //도서 한 권 상세정보
