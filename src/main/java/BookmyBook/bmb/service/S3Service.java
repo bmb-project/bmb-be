@@ -2,6 +2,7 @@ package BookmyBook.bmb.service;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
@@ -13,6 +14,7 @@ import java.io.InputStream;
 import java.util.UUID;
 
 @Service
+@Transactional(readOnly = true)
 public class S3Service {
 
     private final S3Client s3Client;
