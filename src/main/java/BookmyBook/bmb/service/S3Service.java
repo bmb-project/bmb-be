@@ -1,9 +1,11 @@
 package BookmyBook.bmb.service;
 
+import BookmyBook.bmb.response.ExceptionResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import software.amazon.awssdk.core.exception.SdkException;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectResponse;
@@ -37,6 +39,8 @@ public class S3Service {
         try (InputStream inputStream = file.getInputStream()) {
             PutObjectResponse response = s3Client.putObject(putObjectRequest, RequestBody.fromInputStream(inputStream, file.getSize()));
             System.out.println("File uploaded successfully. ETag: " + response.eTag());
+        } catch (SdkException e) {
+            throw new ExceptionResponse(500, "이미지 업로드 실패", "FAILED_TO_UPLOAD");
         }
 
         // Return the URL of the uploaded file

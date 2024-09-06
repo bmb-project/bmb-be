@@ -22,6 +22,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -119,20 +120,34 @@ public class AdminService {
         return response;
     }
 
-    //도서 추가
+    //도서 등록
     @Transactional
-    public boolean insert(Book book) {
+    public BookDetail_DTO insert(Book book) {
+        //isbn 자릿수 체크
+        if (book.getIsbn().length() != 13) {
+            throw new ExceptionResponse(400, "잘못된 ISBN", "INVALID_ISBN");
+        }
+
+        //날짜 체크
+        if(book.getPublished_date().isAfter(LocalDate.now())){
+            throw new ExceptionResponse(400, "오늘 포함 이전만 입력 가능합니다", "INVALID_PUBLISHED_DATE");
+        }
+
+        //중복 도서 체크
         if(bookRepository.findByIsbn(book.getIsbn()) != null){
             throw new ExceptionResponse(409, "동일한 ISBN의 도서가 존재합니다", "BOOK_ALREADY_INSERT");
         }
 
+        //description 글자수 체크
         if(book.getDescription().length() > 1000){
             throw new ExceptionResponse(400, "소개글은 1000자 이하로 입력 가능합니다", "INVALID_DESCRIPTION");
         }
 
-        Book amISaved = bookRepository.save(book);
+        Book save = bookRepository.save(book);
 
-        return amISaved.getId() != null;
+        return new BookDetail_DTO(save.getIsbn(), save.getTitle(),
+                save.getDescription(), save.getThumbnail(), save.getAuthor_name(),
+                save.getPublisher_name(), save.getPublished_date(), save.getCreated_at(), save.getStatus());
     }
 
     //도서 삭제
