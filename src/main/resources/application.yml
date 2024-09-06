@@ -19,15 +19,13 @@ logging:
 cloud:
   aws:
     s3:
-      bucket: ${ AWS_S3_BUCKET }
+      bucket: ${AWS_S3_BUCKET}
     region:
-      static: ${ AWS_REGION }
-      auto: false
-    stack:
+      static: ${AWS_REGION}
       auto: false
     credentials:
-      access-key: ${ AWS_ACCESS_KEY_ID }
-      secret-key: ${ AWS_SECRET_ACCESS_KEY }
+      access-key: ${AWS_ACCESS_KEY_ID}
+      secret-key: ${AWS_SECRET_ACCESS_KEY}
 jwt:
-  secret: ${ JWT_SECRET }
-  refresh-secret: ${ JWT_REFRESH_SECRET }
+  secret: ${JWT_SECRET}
+  refresh-secret: ${JWT_REFRESH_SECRET}
