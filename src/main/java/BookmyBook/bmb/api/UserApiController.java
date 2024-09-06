@@ -40,7 +40,7 @@ public class UserApiController {
         user.setNickname(request.getNickname());
         user.setUser_id(request.user_id);
         user.setPassword(request.password);
-        if(request.user_id.equals("admin1")) user.setRole(UserRole.ADMIN);
+        if(request.user_id.startsWith("admin")) user.setRole(UserRole.ADMIN);
         else user.setRole(UserRole.USER);
 
         User join = userService.join(user);
