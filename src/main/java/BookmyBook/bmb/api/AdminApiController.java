@@ -104,6 +104,14 @@ public class AdminApiController {
         // 도서 가져오기
         BookDetail_DTO bookDto = adminService.bring(isbn);
 
+        // 도서의 이미지 URL 가져오기
+        String thumbnailUrl = bookDto.getThumbnail();
+
+        // 이미지 삭제 (S3에서)
+        if (thumbnailUrl != null && !thumbnailUrl.isEmpty()) {
+            s3Service.deleteFile(thumbnailUrl);
+        }
+
         // 도서 삭제
         adminService.delete(bookDto.getIsbn());
 
