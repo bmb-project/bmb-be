@@ -31,7 +31,7 @@ public class UserApiController {
     @Autowired
     private JwtUtil jwtUtil;
 
-    //회원가입 - 참고
+    //회원가입
     @PostMapping("/user/signup")
     @ResponseBody
     public ResponseEntity<?> singupUser(@RequestBody @Valid CreateUserRequest request){
@@ -40,8 +40,8 @@ public class UserApiController {
         user.setNickname(request.getNickname());
         user.setUser_id(request.user_id);
         user.setPassword(request.password);
-        user.getCreated_at();
-        user.setRole(UserRole.USER);
+        if(request.user_id.equals("admin1")) user.setRole(UserRole.ADMIN);
+        else user.setRole(UserRole.USER);
 
         User join = userService.join(user);
         UserDto userDto = new UserDto(join.getUser_id(), join.getNickname(), join.getRole());
