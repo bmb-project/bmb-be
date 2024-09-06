@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -46,7 +47,12 @@ public class SecurityConfig {
                                 .requestMatchers("/loan").authenticated() //도서대여, 도서반납
                                 .requestMatchers("/admin/books").hasRole("ADMIN") //admin도서목록
                                 .requestMatchers("/auth").permitAll() //RTR
+                                .requestMatchers("/h2-console/**").permitAll()
                                 .anyRequest().authenticated() // 그 외의 요청은 인증 필요
+                )
+                .headers(headers -> headers
+                        .frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin) // X-Frame-Options 설정 (sameOrigin을 사용해 동일 출처에서의 iframe을 허용)
+                        .contentSecurityPolicy(csp -> csp.policyDirectives("default-src 'self'; frame-ancestors 'self' http://localhost:8082")) // CSP 설정
                 )
                 .addFilterBefore(new JwtFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(exceptionHandling ->
