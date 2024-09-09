@@ -11,6 +11,7 @@ import java.util.List;
 public class BookDetailAdmin_DTO {
     private String isbn;
     private String title;
+    private String description;
     private String thumbnail;
     private String author_name;
     private String publisher_name;
@@ -18,10 +19,11 @@ public class BookDetailAdmin_DTO {
     private BookStatus status;
     private List<AdminLoanDto> loans;
 
-    public BookDetailAdmin_DTO(String isbn, String title, String thumbnail, String author_name, String publisher_name,
+    public BookDetailAdmin_DTO(String isbn, String title, String description, String thumbnail, String author_name, String publisher_name,
                                LocalDate published_date, BookStatus status, List<AdminLoanDto> loans) {
         this.isbn = isbn;
         this.title = title;
+        this.description = description;
         this.thumbnail = thumbnail;
         this.author_name = author_name;
         this.publisher_name = publisher_name;
