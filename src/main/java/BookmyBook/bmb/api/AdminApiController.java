@@ -84,7 +84,7 @@ public class AdminApiController {
         book.setDescription(request.getDescription());
         book.setThumbnail(thumbnailUrl);
         book.setPublished_date(request.getPublished_date());
-        book.setCreated_at(LocalDateTime.now());
+        book.setCreatedAt(LocalDateTime.now());
         book.setStatus(BookStatus.AVAILABLE);
 
         BookDetail_DTO bookDetail_dto = adminService.insert(book);
