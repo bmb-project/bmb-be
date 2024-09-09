@@ -7,15 +7,15 @@ import BookmyBook.bmb.repository.BookRepository;
 import BookmyBook.bmb.repository.LoanRepository;
 import BookmyBook.bmb.response.ExceptionResponse;
 import BookmyBook.bmb.security.JwtUtil;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
-@Transactional(readOnly = true)
+@Transactional
 public class LoanService {
 
     @Autowired

@@ -10,15 +10,15 @@ import BookmyBook.bmb.response.dto.BookDto;
 import BookmyBook.bmb.response.dto.BookDetail_DTO;
 import BookmyBook.bmb.response.dto.WishDto;
 import BookmyBook.bmb.security.JwtUtil;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -26,7 +26,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
-@Transactional(readOnly = true)
+@Transactional
 @RequiredArgsConstructor
 @Slf4j
 public class BookService {
@@ -41,7 +41,7 @@ public class BookService {
     //도서 목록 조회
     public BookResponse getBooks(int page, int size, String category, String keyword, String token){
         //페이징 요청에 따른 페이징 처리
-        Pageable pageable = PageRequest.of(page - 1, size);
+        Pageable pageable = PageRequest.of(page - 1, size, Sort.by(Sort.Order.desc("createdAt")));
 
         //검색 조건 설정
         Specification<Book> spec = BookSpecification.byCategoryAndKeyword(category, keyword);
@@ -147,7 +147,7 @@ public class BookService {
                     wishCount,
                     wished
             );
-        }catch (DataIntegrityViolationException e){
+        }catch (Exception e){
             throw new ExceptionResponse(400, "잘못된 isbn", "INVALID_ISBN");
         }
     }
@@ -206,7 +206,7 @@ public class BookService {
 
         BookDetail_DTO dto = new BookDetail_DTO(book.getIsbn(), book.getTitle(),
                 book.getDescription(), book.getThumbnail(), book.getAuthor_name(),
-                book.getPublisher_name(), book.getPublished_date(), book.getCreated_at(), bookSt);
+                book.getPublisher_name(), book.getPublished_date(), book.getCreatedAt(), bookSt);
         // Optional의 값이 존재하는 경우 DTO로 변환, 없으면 null 반환
         return dto;
     }

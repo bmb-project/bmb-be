@@ -37,14 +37,14 @@
         @Column(nullable = false)
         private LocalDate published_date; //출판 날짜
 
-        @Column(updatable = false, nullable = false)
-        private LocalDateTime created_at; //등록 일시
+        @Column(name = "created_at", updatable = false, nullable = false)
+        private LocalDateTime createdAt; //등록 일시
 
         @Enumerated(EnumType.STRING)
         private BookStatus status; //도서 대여 상태
 
         @PrePersist
         protected void onCreate(){
-            this.created_at = LocalDateTime.now();
+            this.createdAt = LocalDateTime.now();
         }
     }

@@ -132,13 +132,13 @@ public class BookApiController {
         book.setThumbnail(request.thumbnail);
         book.setDescription(request.description);
         book.setPublished_date(request.published_date);
-        book.setCreated_at(LocalDateTime.now());
+        book.setCreatedAt(LocalDateTime.now());
         book.setStatus(request.status);
 
         Book insert = bookService.insert(book);
         BookDetail_DTO bookDto = new BookDetail_DTO(insert.getIsbn(), insert.getTitle(),
                 insert.getDescription(), insert.getThumbnail(), insert.getAuthor_name(),
-                insert.getPublisher_name(), insert.getPublished_date(), insert.getCreated_at(), insert.getStatus());
+                insert.getPublisher_name(), insert.getPublished_date(), insert.getCreatedAt(), insert.getStatus());
 
         return ResponseEntity.ok(new ApiResponse(200, "도서 추가 성공", bookDto));
     }

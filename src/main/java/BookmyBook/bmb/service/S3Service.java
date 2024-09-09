@@ -1,9 +1,9 @@
 package BookmyBook.bmb.service;
 
 import BookmyBook.bmb.response.ExceptionResponse;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.core.exception.SdkException;
 import software.amazon.awssdk.services.s3.S3Client;
@@ -18,7 +18,7 @@ import java.io.InputStream;
 import java.util.UUID;
 
 @Service
-@Transactional(readOnly = true)
+@Transactional
 public class S3Service {
 
     private final S3Client s3Client;

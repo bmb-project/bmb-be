@@ -13,14 +13,15 @@ import BookmyBook.bmb.response.dto.BookDetailAdmin_DTO;
 import BookmyBook.bmb.response.dto.BookDetail_DTO;
 import BookmyBook.bmb.security.JwtUtil;
 import jakarta.persistence.EntityManager;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -29,7 +30,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
-@Transactional(readOnly = true)
+@Transactional
 @RequiredArgsConstructor
 @Slf4j
 public class AdminService {
@@ -47,7 +48,7 @@ public class AdminService {
     public AdminBookResponse getAdminBooks(int page, int size, String category, String keyword, String token){
 
         //페이징 요청에 따른 페이징 처리
-        Pageable pageable = PageRequest.of(page - 1, size);
+        Pageable pageable = PageRequest.of(page - 1, size, Sort.by(Sort.Order.desc("createdAt")));
 
         //검색 조건 설정
         Specification<Book> spec = BookSpecification.byCategoryAndKeyword(category, keyword);
@@ -147,7 +148,7 @@ public class AdminService {
 
         return new BookDetail_DTO(save.getIsbn(), save.getTitle(),
                 save.getDescription(), save.getThumbnail(), save.getAuthor_name(),
-                save.getPublisher_name(), save.getPublished_date(), save.getCreated_at(), save.getStatus());
+                save.getPublisher_name(), save.getPublished_date(), save.getCreatedAt(), save.getStatus());
     }
 
     //도서 삭제
@@ -175,7 +176,7 @@ public class AdminService {
         }
         return new BookDetail_DTO(book.getIsbn(), book.getTitle(),
                 book.getDescription(), book.getThumbnail(), book.getAuthor_name(),
-                book.getPublisher_name(), book.getPublished_date(), book.getCreated_at(), book.getStatus());
+                book.getPublisher_name(), book.getPublished_date(), book.getCreatedAt(), book.getStatus());
     }
 
     //도서 한 권 상세정보

@@ -2,16 +2,16 @@ package BookmyBook.bmb.service;
 
 import BookmyBook.bmb.domain.RefreshToken;
 import BookmyBook.bmb.repository.RefreshTokenRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 @Service
-@Transactional(readOnly = true)
+@Transactional
 public class RefreshTokenService {
 
     @Autowired
