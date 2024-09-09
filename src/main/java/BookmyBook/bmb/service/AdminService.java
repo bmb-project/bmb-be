@@ -197,7 +197,7 @@ public class AdminService {
             al_adminLoanDTO.add(ald);
         }
 
-        return new BookDetailAdmin_DTO(book.getIsbn(), book.getTitle(), book.getThumbnail(),
+        return new BookDetailAdmin_DTO(book.getIsbn(), book.getTitle(), book.getDescription(), book.getThumbnail(),
                 book.getAuthor_name(), book.getPublisher_name(), book.getPublished_date(),
                 book.getStatus(), al_adminLoanDTO);
     }
