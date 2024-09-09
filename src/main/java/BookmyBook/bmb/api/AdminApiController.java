@@ -67,7 +67,7 @@ public class AdminApiController {
         return ResponseEntity.ok(new ApiResponse(200, "도서 목록 및 대여 정보 조회 성공", adminBookResponse));
     }
 
-    @PostMapping("admin/books") // 도서 추가
+    @PostMapping("/admin/books") // 도서 추가
     @PreAuthorize("hasRole('Admin')")
     public ResponseEntity<?> insertBook(
             @ModelAttribute CreateBookRequest request,
@@ -93,7 +93,7 @@ public class AdminApiController {
 
     }
 
-    @DeleteMapping("/books/{isbn}") // ID로 한 권 선택 삭제
+    @DeleteMapping("/admin/books/{isbn}") // ID로 한 권 선택 삭제
     @PreAuthorize("hasRole('Admin')")
     public ResponseEntity<?> viewDelete(@PathVariable("isbn") String isbn) {
 
@@ -119,7 +119,7 @@ public class AdminApiController {
     }
 
     // Admin 조회
-    @GetMapping("admin/books/{isbn}")
+    @GetMapping("/admin/books/{isbn}")
     @PreAuthorize("hasRole('Admin')")
     public ResponseEntity<?> adminViewBook(@PathVariable("isbn") String isbn, HttpServletRequest request){
 
