@@ -1,7 +1,7 @@
 # 📗 図書管理サービス bmb(bookmybook) 
 <img src="https://i.esdrop.com/d/f/8vpuvvaxBD/BN88D9TPzZ.jpg" width="100%"/>
 
-**bmb project front-end repository**
+**bmb project back-end repository**
 - Site URL : https://bmb-project.vercel.app/
 - Notion URL : https://observant-cheetah-dc4.notion.site/bmb-project-0e4cf89411834ef3bfd297b304bcd9ea
 
