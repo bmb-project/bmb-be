@@ -27,10 +27,10 @@
 ## メンバー ##
 | 漁蓮眞(オ・ヨンジン, Yeonjin Eo) / BE                                                                                  | 金宣佑(キム・ソヌ, Seonu Kim) / BE                                      |
 |-----------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------|
-| <img src="https://i.esdrop.com/d/f/8vpuvvaxBD/2MgJoAIXQ3.jpg" width="450"/>  |     <img src="https://i.esdrop.com/d/f/8vpuvvaxBD/Kl1gb3lv0O.jpg" width="200"/>          |
-| wks1211@gmail.com                                                                                                   | bareulgod2466@gmail.com                                            |
-| https://github.com/EoYeonjin                                                                                       | https://github.com/HauOmochikaeri                                  |
-| BEの技術スタック選定、BEの開発環境セッティング、</br>API仕様書作成、API開発、BEをAWSのEC2とS3でデプロイ、</br>BEのCI/CD構築、ERD作成 | DB設計、API開発                                                 |
+| <div align="center"><img src="https://i.esdrop.com/d/f/8vpuvvaxBD/2MgJoAIXQ3.jpg" width="450"/></div>  | <div align="center"><img src="https://i.esdrop.com/d/f/8vpuvvaxBD/grnFyCpRL4.jpg" width="190"/></div>  |
+| wks1211@gmail.com                                       | bareulgod2466@gmail.com                                            |
+| https://github.com/EoYeonjin                            | https://github.com/HauOmochikaeri                                  |
+| BEの技術スタック選定、BEの開発環境セッティング、</br>API仕様書作成、API開発、BEをAWSのEC2とS3でデプロイ、</br>BEのCI/CD構築、ERD作成 | DB設計、API開発  |
 
 <br/>
 
