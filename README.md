@@ -25,7 +25,7 @@
 <br/>
 
 ## メンバー ##
-| 漁蓮眞(オ・ヨンジン, Yeonjin Eo) / BE                                                                                  | 金宣佑(キム・ソヌ, Seonu Kim) / BE                                      |
+| 魚蓮眞(オ・ヨンジン, Yeonjin Eo) / BE                                                                                  | 金宣佑(キム・ソヌ, Seonu Kim) / BE                                      |
 |-----------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------|
 | <div align="center"><img src="https://i.esdrop.com/d/f/8vpuvvaxBD/2MgJoAIXQ3.jpg" width="450"/></div>  | <div align="center"><img src="https://i.esdrop.com/d/f/8vpuvvaxBD/grnFyCpRL4.jpg" width="190"/></div>  |
 | wks1211@gmail.com                                       | bareulgod2466@gmail.com                                            |
