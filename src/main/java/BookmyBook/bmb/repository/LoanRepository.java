@@ -12,6 +12,7 @@ public interface LoanRepository extends JpaRepository<Loan, Long> {
     Loan findByIsbnAndReturnAtIsNull(String isbn);
     Loan findByIsbnAndReturnAtIsNullAndUserId(String isbn, String userId);
     List<Loan> findByIsbnIn(List<String> isbns);
+    List<Loan> findByUserIdIn(List<String> userIds); //회원별 대여 정보 조회
 
     List<Loan> findByIsbn(String isbn);
 }

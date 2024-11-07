@@ -2,10 +2,7 @@ package BookmyBook.bmb.api;
 
 import BookmyBook.bmb.domain.Book;
 import BookmyBook.bmb.domain.BookStatus;
-import BookmyBook.bmb.response.AdminBookResponse;
-import BookmyBook.bmb.response.ApiResponse;
-import BookmyBook.bmb.response.ApiResponseNoResult;
-import BookmyBook.bmb.response.ExceptionResponse;
+import BookmyBook.bmb.response.*;
 import BookmyBook.bmb.response.dto.BookDetailAdmin_DTO;
 import BookmyBook.bmb.response.dto.BookDetail_DTO;
 import BookmyBook.bmb.security.JwtUtil;
@@ -132,6 +129,25 @@ public class AdminApiController {
         BookDetailAdmin_DTO bookDto = adminService.bookView(isbn);
 
         return ResponseEntity.ok(new ApiResponse(200, "도서 상세 조회 성공", bookDto));
+    }
+
+    //회원목록&대여정보 조회
+    @GetMapping("/admin/users")
+    @PreAuthorize("hasRole('Admin')")
+    public ResponseEntity<?> getUsersLoanList(
+            @RequestParam(value = "page", defaultValue = "1") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size,
+            @RequestParam(value = "category", required = false) String category,
+            @RequestParam(value = "keyword", required = false) String keyword){
+
+        AdminUesrsResponse adminUesrsResponse = adminService.getUsersLoanList(page, size, category, keyword);
+
+        //page > total_pages
+        if(adminUesrsResponse.getTotal_pages() < page){
+            throw new ExceptionResponse(400, "요청한 페이지 번호가 전체 페이지 수를 초과", "INVALID_PAGE");
+        }
+
+        return ResponseEntity.ok(new ApiResponse(200, "회원 목록 및 대여 정보 조회 성공", adminUesrsResponse));
     }
 
     @Data
