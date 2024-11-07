@@ -25,15 +25,15 @@ public class User{
     @Column(length = 60, nullable = false)
     private String password; //비밀번호
 
-    @Column(updatable = false, nullable = false)
-    private LocalDateTime created_at; //가입 일시
+    @Column(name = "created_at", updatable = false, nullable = false)
+    private LocalDateTime createdAt; //가입 일시
 
     @Enumerated(EnumType.STRING)
     private UserRole role;//사용자 역할
 
     @PrePersist
     protected void onCreate(){
-        this.created_at = LocalDateTime.now();
+        this.createdAt = LocalDateTime.now();
     }
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)

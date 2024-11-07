@@ -1,16 +1,11 @@
 package BookmyBook.bmb.service;
 
 import BookmyBook.bmb.domain.*;
-import BookmyBook.bmb.repository.BookRepository;
-import BookmyBook.bmb.repository.LoanRepository;
-import BookmyBook.bmb.repository.UserRepository;
-import BookmyBook.bmb.repository.WishRepository;
+import BookmyBook.bmb.repository.*;
 import BookmyBook.bmb.response.AdminBookResponse;
+import BookmyBook.bmb.response.AdminUesrsResponse;
 import BookmyBook.bmb.response.ExceptionResponse;
-import BookmyBook.bmb.response.dto.AdminBookDto;
-import BookmyBook.bmb.response.dto.AdminLoanDto;
-import BookmyBook.bmb.response.dto.BookDetailAdmin_DTO;
-import BookmyBook.bmb.response.dto.BookDetail_DTO;
+import BookmyBook.bmb.response.dto.*;
 import BookmyBook.bmb.security.JwtUtil;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
@@ -25,6 +20,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -40,6 +36,7 @@ public class AdminService {
     private final WishRepository wishRepository;
     private final LoanRepository loanRepository;
     private final UserRepository userRepository;
+    private final AdminUserRepository adminUserRepository;
     private final UserService userService;
     private final LoanService loanService;
     private final JwtUtil jwtUtil;
@@ -201,6 +198,59 @@ public class AdminService {
         return new BookDetailAdmin_DTO(book.getIsbn(), book.getTitle(), book.getDescription(), book.getThumbnail(),
                 book.getAuthor_name(), book.getPublisher_name(), book.getPublished_date(),
                 book.getStatus(), al_adminLoanDTO);
+    }
+
+    //회원 목록 및 대여 정보 조회
+    public AdminUesrsResponse getUsersLoanList(int page, int size, String category, String keyword){
+        // 페이징 설정: createdAt을 기준으로 정렬 (가입 순)
+        Pageable pageable = PageRequest.of(page - 1, size, Sort.by(Sort.Order.desc("createdAt")));
+
+        //검색 조건 설정
+        Specification<User> spec = UserSpecification.byCategoryAndKeyword(category, keyword);
+
+        // 회원 목록 조회 (카테고리, 키워드 기반으로 필터링 가능)
+        Page<User> userPage = adminUserRepository.findAll(spec, pageable);
+        List<User> users = userPage.getContent();
+
+        // 회원 ID 목록 추출
+        List<String> userIds = users.stream()
+                .map(User::getUser_id)
+                .collect(Collectors.toList());
+
+        // 해당 회원들의 대여 기록 조회
+        List<Loan> loans = loanRepository.findByUserIdIn(userIds);
+
+        // 대여 기록을 회원 ID별로 그룹화
+        Map<String, List<AdminUserLoanDto>> loanMap = loans.stream()
+                .collect(Collectors.groupingBy(Loan::getUserId,
+                        Collectors.mapping(loan -> new AdminUserLoanDto(
+                                loan.getIsbn(),
+                                loan.getBook().getTitle(),
+                                loan.getLoan_at(),
+                                loan.getReturnAt()
+                        ), Collectors.toList())
+                ));
+
+        // 회원에 대한 대여 정보 매핑
+        List<AdminUsersDto> userDtos = users.stream().map(user -> {
+            // 해당 회원의 대여 정보를 loanMap에서 조회
+            List<AdminUserLoanDto> loanDtos = loanMap.getOrDefault(user.getUser_id(), Collections.emptyList());
+            return new AdminUsersDto(user.getUser_id(), user.getNickname(), loanDtos);
+        }).collect(Collectors.toList());
+
+        int total_pages = userPage.getTotalPages() > 0 ? userPage.getTotalPages() : 1;
+
+        // 응답 객체 생성
+        AdminUesrsResponse response = new AdminUesrsResponse();
+        response.setTotal_pages(total_pages);
+        response.setCurrent_page(pageable.getPageNumber() + 1);
+        response.setPage_size(pageable.getPageSize());
+        response.setTotal_items(userPage.getTotalElements());
+        response.setCategory(category);
+        response.setKeyword(keyword);
+        response.setUsers(userDtos);
+
+        return response;
     }
 
 }
