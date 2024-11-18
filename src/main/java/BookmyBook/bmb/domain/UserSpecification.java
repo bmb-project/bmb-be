@@ -21,7 +21,7 @@ public class UserSpecification {
             }
 
             return switch (category.toLowerCase()) {
-                case "user_id" -> criteriaBuilder.like(criteriaBuilder.lower(root.get("user_id")), lowerCaseKeyword);
+                case "id" -> criteriaBuilder.like(criteriaBuilder.lower(root.get("user_id")), lowerCaseKeyword);
                 case "nickname" -> criteriaBuilder.like(criteriaBuilder.lower(root.get("nickname")), lowerCaseKeyword);
                 default -> criteriaBuilder.conjunction(); //기본값
             };
