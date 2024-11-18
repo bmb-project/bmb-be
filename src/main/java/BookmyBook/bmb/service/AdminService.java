@@ -224,6 +224,7 @@ public class AdminService {
         Map<String, List<AdminUserLoanDto>> loanMap = loans.stream()
                 .collect(Collectors.groupingBy(Loan::getUserId,
                         Collectors.mapping(loan -> new AdminUserLoanDto(
+                                loan.getId(),
                                 loan.getIsbn(),
                                 loan.getBook().getTitle(),
                                 loan.getLoan_at(),
@@ -235,7 +236,7 @@ public class AdminService {
         List<AdminUsersDto> userDtos = users.stream().map(user -> {
             // 해당 회원의 대여 정보를 loanMap에서 조회
             List<AdminUserLoanDto> loanDtos = loanMap.getOrDefault(user.getUser_id(), Collections.emptyList());
-            return new AdminUsersDto(user.getUser_id(), user.getNickname(), loanDtos);
+            return new AdminUsersDto(user.getUser_id(), user.getNickname(), user.getCreatedAt(), loanDtos);
         }).collect(Collectors.toList());
 
         int total_pages = userPage.getTotalPages() > 0 ? userPage.getTotalPages() : 1;
@@ -252,5 +253,4 @@ public class AdminService {
 
         return response;
     }
-
 }

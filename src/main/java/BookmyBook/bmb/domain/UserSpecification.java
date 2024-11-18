@@ -15,13 +15,13 @@ public class UserSpecification {
             if (category.equalsIgnoreCase("all")) {
                 // 모든 필드에 대해 키워드를 검색
                 return criteriaBuilder.or(
-                        criteriaBuilder.like(criteriaBuilder.lower(root.get("id")), lowerCaseKeyword),
+                        criteriaBuilder.like(criteriaBuilder.lower(root.get("user_id")), lowerCaseKeyword),
                         criteriaBuilder.like(criteriaBuilder.lower(root.get("nickname")), lowerCaseKeyword)
                 );
             }
 
             return switch (category.toLowerCase()) {
-                case "id" -> criteriaBuilder.like(criteriaBuilder.lower(root.get("id")), lowerCaseKeyword);
+                case "user_id" -> criteriaBuilder.like(criteriaBuilder.lower(root.get("user_id")), lowerCaseKeyword);
                 case "nickname" -> criteriaBuilder.like(criteriaBuilder.lower(root.get("nickname")), lowerCaseKeyword);
                 default -> criteriaBuilder.conjunction(); //기본값
             };
