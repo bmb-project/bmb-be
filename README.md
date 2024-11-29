@@ -95,10 +95,10 @@ Git, Notion, Slack
 
 ## [ERD](https://www.notion.so/DB-6717f586b5da4d618735694179a44bbb) ##
 ### 概念的データモデリング ###
-<img src="https://i.esdrop.com/d/f/8vpuvvaxBD/N9qgfTl0r4.png" width="100%"/>
+<img src="https://i.esdrop.com/d/f/8vpuvvaxBD/wrWQgNzkwR.png" width="100%"/>
 
 ### 論理的データモデリング ###
-<img src="https://i.esdrop.com/d/f/8vpuvvaxBD/7MKPSCfc6P.png" width="100%"/>
+<img src="https://i.esdrop.com/d/f/8vpuvvaxBD/KP44TH2zoh.png" width="100%"/>
 
 <br/>
 
