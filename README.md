@@ -30,7 +30,7 @@
 | <div align="center"><img src="https://i.esdrop.com/d/f/8vpuvvaxBD/2MgJoAIXQ3.jpg" width="450"/></div>  | <div align="center"><img src="https://i.esdrop.com/d/f/8vpuvvaxBD/grnFyCpRL4.jpg" width="190"/></div>  |
 | wks1211@gmail.com                                       | bareulgod2466@gmail.com                                            |
 | https://github.com/EoYeonjin                            | https://github.com/HauOmochikaeri                                  |
-| BEの技術スタック選定、BEの開発環境セッティング、</br>API仕様書作成、API開発、BEをAWSのEC2とS3でデプロイ、</br>BEのCI/CD構築、ERD作成 | DB設計、API開発  |
+| BEの技術スタック選定、BEの開発環境セッティング、</br>API仕様書作成、API開発、BEをAWSのEC2とS3でデプロイ、</br>BEのCI/CD構築、ERD作成 | BEの技術スタック選定、</br>DB設計、API開発  |
 
 <br/>
 
@@ -56,39 +56,40 @@ Git, Notion, Slack
 ### USER API ###
 | 機能       | Method | URL | 担当者 | 開発期間 |
 |------------|--------|-----------| ----------- | ------------ |
-| [**アカウント作成**](https://www.notion.so/c151da28fc8d47f9b20bf1995af96c95) | POST | /user/signup | 漁蓮眞(オ・ヨンジン) | 2024年8月12日 → 2024年8月13日 |
-| [**ログイン**](https://www.notion.so/c8a568420a0f4665a2ff2c8da2b68df4) | POST | /user/signin | 漁蓮眞(オ・ヨンジン) | 2024年8月13日 → 2024年8月18日 | 
-| [**サインアウト**](https://www.notion.so/dd8810c12ba64bd1a7b16711cc4c1c84) | POST | /user/signout | 漁蓮眞(オ・ヨンジン) | 2024年9月2日 → 2024年9月2日 | 
-| [**会員別貸出リスト照会**](https://www.notion.so/0154b8d0a8154e60872e14f1707307da) | GET | /user/loan | 漁蓮眞(オ・ヨンジン) | 2024年8月26日 → 2024年8月26日 | 
-| [**会員別お気に入り</br>リスト照会**](https://www.notion.so/9fb3daa31a834d97b8b031be474b759f) | GET | /user/wish | 漁蓮眞(オ・ヨンジン) | 2024年8月27日 → 2024年8月27日 | 
+| [**アカウント作成**](https://www.notion.so/c151da28fc8d47f9b20bf1995af96c95) | POST | /user/signup | 魚蓮眞(オ・ヨンジン) | 2024年8月12日 → 2024年8月13日 |
+| [**ログイン**](https://www.notion.so/c8a568420a0f4665a2ff2c8da2b68df4) | POST | /user/signin | 魚蓮眞(オ・ヨンジン) | 2024年8月13日 → 2024年8月18日 | 
+| [**サインアウト**](https://www.notion.so/dd8810c12ba64bd1a7b16711cc4c1c84) | POST | /user/signout | 魚蓮眞(オ・ヨンジン) | 2024年9月2日 → 2024年9月2日 | 
+| [**会員別貸出リスト照会**](https://www.notion.so/0154b8d0a8154e60872e14f1707307da) | GET | /user/loan | 魚蓮眞(オ・ヨンジン) | 2024年8月26日 → 2024年8月26日 | 
+| [**会員別お気に入り</br>リスト照会**](https://www.notion.so/9fb3daa31a834d97b8b031be474b759f) | GET | /user/wish | 魚蓮眞(オ・ヨンジン) | 2024年8月27日 → 2024年8月27日 | 
 
 ### BOOK API ###
 | 機能       | Method | URL | 担当者 | 開発期間 |
 |------------|--------|-----------| ----------- | ------------ |
-| [**図書リスト**](https://www.notion.so/8d6f9414d2434908b016f9fc16199c71) | GET | /books | 漁蓮眞(オ・ヨンジン) | 2024年8月20日 → 2024年8月22日 |
+| [**図書リスト**](https://www.notion.so/8d6f9414d2434908b016f9fc16199c71) | GET | /books | 魚蓮眞(オ・ヨンジン) | 2024年8月20日 → 2024年8月22日 |
 | [**図書情報**](https://www.notion.so/a20afcbb92094391bae81b66f16ed804) | GET | /books/{isbn} | 金宣佑(キム・ソヌ) | 2024年8月24日 → 2024年8月25日 |
-| [**図書別お気に入りリスト照会**](https://www.notion.so/2331b0a3dcf94783915bcc078e5cd2a4) | GET | /books/{isbn}/wish | 漁蓮眞(オ・ヨンジン) | 2024年8月28日 → 2024年8月28日 |
-| [**お気に入り登録**](https://www.notion.so/121c74624e9d4fad9695746779d0f05d) | POST | /books/{isbn}/wish | 漁蓮眞(オ・ヨンジン) | 2024年8月28日 → 2024年8月28日 |
-| [**お気に入り取り消し**](https://www.notion.so/12d1f0fe5e084a02a09b35f8609049fa) | DELETE | /books/{isbn}/wish | 漁蓮眞(オ・ヨンジン) | 2024年8月28日 → 2024年8月28日 |
+| [**図書別お気に入りリスト照会**](https://www.notion.so/2331b0a3dcf94783915bcc078e5cd2a4) | GET | /books/{isbn}/wish | 魚蓮眞(オ・ヨンジン) | 2024年8月28日 → 2024年8月28日 |
+| [**お気に入り登録**](https://www.notion.so/121c74624e9d4fad9695746779d0f05d) | POST | /books/{isbn}/wish | 魚蓮眞(オ・ヨンジン) | 2024年8月28日 → 2024年8月28日 |
+| [**お気に入り取り消し**](https://www.notion.so/12d1f0fe5e084a02a09b35f8609049fa) | DELETE | /books/{isbn}/wish | 魚蓮眞(オ・ヨンジン) | 2024年8月28日 → 2024年8月28日 |
 
 ### LOAN API ###
 | 機能       | Method | URL | 担当者 | 開発期間 |
 |------------|--------|-----------| ----------- | ------------ |
-| [**貸出**](https://www.notion.so/afec36e95de24f42a72a2618f87a39c7) | POST | /loan | 漁蓮眞(オ・ヨンジン) | 2024年8月22日 → 2024年8月24日 |
-| [**返却**](https://www.notion.so/81a55677ae7c4b1985bd458fd857ec8b) | PUT | /loan | 漁蓮眞(オ・ヨンジン) | 2024年8月22日 → 2024年8月24日 |
+| [**貸出**](https://www.notion.so/afec36e95de24f42a72a2618f87a39c7) | POST | /loan | 魚蓮眞(オ・ヨンジン) | 2024年8月22日 → 2024年8月24日 |
+| [**返却**](https://www.notion.so/81a55677ae7c4b1985bd458fd857ec8b) | PUT | /loan | 魚蓮眞(オ・ヨンジン) | 2024年8月22日 → 2024年8月24日 |
 
 ### ADMIN API ###
 | 機能       | Method | URL | 担当者 | 開発期間 |
 |------------|--------|-----------| ----------- | ------------ |
 | [**図書登録**](https://www.notion.so/9b358a3f4ba040beb6ed84fbd2d0d23d) | POST | /admin/books | 金宣佑(キム・ソヌ) | 2024年8月16日 → 2024年8月18日 |
-| [**図書リスト（アドミン）**](https://www.notion.so/6c8e31da922349478b8b7e984d6606b5) | GET | /admin/books | 漁蓮眞(オ・ヨンジン) | 2024年8月24日 → 2024年8月25日 |
+| [**図書リスト（アドミン）**](https://www.notion.so/6c8e31da922349478b8b7e984d6606b5) | GET | /admin/books | 魚蓮眞(オ・ヨンジン) | 2024年8月24日 → 2024年8月25日 |
 | [**図書詳細情報（アドミン）**](https://www.notion.so/7394a072c03c40ae9ee75b499c82b81f) | GET | /admin/books/{isbn} | 金宣佑(キム・ソヌ) | 2024年9月3日 → 2024年9月3日 |
 | [**図書削除**](https://www.notion.so/14c43611ab81438cba6722b6782cb86b) | DELETE | /admin/books/{isbn} | 金宣佑(キム・ソヌ) | 2024年8月26日 → 2024年8月27日 |
+| [**会員リスト（アドミン）**](https://www.notion.so/14c43611ab81438cba6722b6782cb86b) | GET | /admin/users | 魚蓮眞(オ・ヨンジン) | 2024年11月6日 → 2024年11月7日 |
 
 ### Token API ###
 | 機能       | Method | URL | 担当者 | 開発期間 |
 |------------|--------|-----------| ----------- | ------------ |
-| [**Refresh Token Rotation**](https://www.notion.so/Refresh-Token-Rotation-6de986329596473985a541feb4067f19) | POST | /auth | 漁蓮眞(オ・ヨンジン) | 2024年8月26日 → 2024年8月27日 |
+| [**Refresh Token Rotation**](https://www.notion.so/API-3ddf796b76c9410eb0da71231557d632) | POST | /auth | 漁蓮眞(オ・ヨンジン) | 2024年8月26日 → 2024年8月27日 |
 
 <br/>
 
@@ -96,7 +97,7 @@ Git, Notion, Slack
 ### 概念的データモデリング ###
 <img src="https://i.esdrop.com/d/f/8vpuvvaxBD/N9qgfTl0r4.png" width="100%"/>
 
-### 概念的データモデリング ###
+### 論理的データモデリング ###
 <img src="https://i.esdrop.com/d/f/8vpuvvaxBD/7MKPSCfc6P.png" width="100%"/>
 
 <br/>
@@ -128,9 +129,6 @@ Git, Notion, Slack
 **図書リスト(USER,ADMIN)、お気に入りリスト、貸出リスト(USER)**
 - キーワード(ALL)、タイトル、作家、出版社カテゴリで区分して図書を検索可能
 - 1ページに12個ずつ、数字をクリックすると該当ページに遷移、＜＞でページ5個ずつ1グループずつ移動可能
-  
-**図書詳細(USER, ADMIN)**
-- 
 
 **図書登録(ADMIN)**
 - title、isbn、thumbnail、author_name、publisher_name、published_date、descriptionを作成し、form-dataで受信してDBに保存
